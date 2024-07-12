@@ -1,0 +1,56 @@
+<div class="order-history-container container mt-1 mb-3">
+  <h2 class="text-center mb-4">Your Order History</h2>
+
+  <!-- Total Orders and Amount Spent Section -->
+  <div class="summary-cards d-flex justify-content-around mb-4">
+    <div class="card shadow-sm text-center">
+      <div class="card-body">
+        <mat-icon class="summary-icon w-100 h-50">shopping_cart</mat-icon>
+        <h5 class="mt-0">Total Orders</h5>
+        <p class="summary-value mb-lg-5">{{ orderHistory.length }}</p>
+      </div>
+    </div>
+    <div class="card shadow-sm text-center">
+      <div class="card-body">
+        <mat-icon class="summary-icon w-100 h-50">attach_money</mat-icon>
+        <h5>Total Amount Spent</h5>
+        <p class="summary-value">Rs {{ totalAmountSpent }}/-</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order List Section -->
+  <div *ngIf="orderHistory.length === 0" class="empty-history text-center">
+    <p>No orders found.</p>
+  </div>
+
+  <div *ngIf="orderHistory.length > 0" class="order-list mt-3">
+    <mat-accordion>
+      <mat-expansion-panel *ngFor="let order of orderHistory" class="order-card mb-2 shadow-sm mt-3">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <div class="d-flex justify-content-between w-100">
+              <span>Order ID: {{ order.orderId }}</span>
+              <span>Date: {{ order.timeStamp  }}</span>
+            </div>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div>
+          <p class="card-text"><strong>Total Price:</strong> Rs {{ order.totalPrice }}</p>
+          <p class="card-text"><strong>Discount:</strong> Rs {{ order.discount }}</p>
+          <p class="card-text"><strong>Billing Price:</strong> Rs {{ order.billingPrice }}</p>
+          <p class="card-text"><strong>Total Items:</strong> {{ order.totalItems }}</p>
+          <p class="card-text"><strong>Payment Method:</strong> {{ order.paymentMethod }}</p>
+          <h6>Items:</h6>
+          <ul>
+            <li *ngFor="let item of order.cartItems">
+              {{ item.dishName }} - Rs {{ item.dishPrice }} x {{ item.quantity }}
+            </li>
+          </ul>
+          <h6>Delivery Address:</h6>
+          <p>{{ order.customerAddress.address1 }}, {{ order.customerAddress.landMark }}, {{ order.customerAddress.city }} - {{ order.customerAddress.pincode }}</p>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+</div>

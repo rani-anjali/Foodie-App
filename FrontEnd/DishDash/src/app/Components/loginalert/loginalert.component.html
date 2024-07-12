@@ -1,0 +1,17 @@
+<div class="header flex justify-content-end align-items-center">
+  <button mat-icon-button class="close-button" (click)="closeDialog()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<div class="alert-container p-5">
+  <div class="content text-center">
+    <h1 mat-dialog-title>
+      <mat-icon class="error-icon text-black w-100 h-100 mb-1" fontIcon="error_outline"></mat-icon>
+    </h1>
+    <div mat-dialog-content>
+      <h4>You need to login first</h4>
+      <a class="login-link pointer" (click)="openLoginDialog()">Click here to login</a>
+    </div>
+  </div>
+</div>

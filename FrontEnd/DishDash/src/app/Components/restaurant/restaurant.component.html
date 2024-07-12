@@ -1,0 +1,27 @@
+<div class="resBox p-5">
+  <div *ngIf="restaurants.length !== 0" class="content">
+    <div class="restaurants row gap-4 p-3 justify-content-center">
+      <div class="card col-12 col-md-5 col-lg-3 mb-4" *ngFor="let restaurant of restaurants | paginate: { itemsPerPage: itemsPerPage, currentPage: p }">
+        <app-restaurantcard [onerestaurant]="restaurant"></app-restaurantcard>
+      </div>
+    </div>
+
+    <div class="controls text-center m-3 paginators">
+      <pagination-controls (pageChange)="p = $event" class="pagination"></pagination-controls>
+    </div>
+  </div>
+
+  <div class="text-center p-5" *ngIf="noRestuarant">
+    <h3 class="text-info-emphasis">Sorry, No Restaurant In Your City</h3>
+    <p>We are working hard to bring DishDash to your city</p>
+  </div>
+
+  <div class="text-center p-5" *ngIf="noSuchRestaurant">
+    <h3 class="text-info-emphasis">No, Such Restaurant In Your City</h3>
+    <p>Trying Searching Something Else...</p>
+  </div>
+
+  <div class="spinner-container" *ngIf="spinnerVisible">
+    <mat-spinner class="spinner" ></mat-spinner>
+  </div>
+</div>

@@ -1,0 +1,87 @@
+.main {
+  background: linear-gradient(to right, #3B273F, #523a57); /* Gradient background */
+  color: #fff; /* White text */
+  height: 50vh;
+  background-size: cover;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* border-radius: 20px; */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn {
+  border:none;
+}
+
+.btn-location {
+  background-color: #F4835F;
+  color:white
+}
+
+.dropdown-menu {
+  --bs-dropdown-link-active-bg:#F4835F !important;
+  color: white;
+}
+
+.headline h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.headline span {
+  font-style: italic;
+  color: #F4835F /* Gold color */
+}
+
+.searchbar {
+  gap: 10px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.search input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+.button button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  border-radius: 10px;
+  background-color: #F4835F; /* Gold color */
+  color: #fff;
+  transition: background-color 0.3s ease;
+}
+
+.button button:hover {
+  background-color: #f9a085; /* Darker gold on hover */
+}
+
+.dropdown-menu {
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: 10px;
+}
+
+.dropdown-menu a {
+  color: #333; /* Dark gray text */
+  text-shadow: none; /* Remove shadow */
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .headline h1 {
+    font-size: 2rem;
+  }
+}

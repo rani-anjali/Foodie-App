@@ -1,0 +1,28 @@
+<div class="main flex justify-content-center align-items-center text-center">
+  <div class="headline">
+    <h1>Discover the best food & drinks in <span>{{city}}</span></h1>
+  </div>
+  <div class="searchbar flex flex-column flex-md-row align-items-center m-3">
+    <div class="dropdown mb-3 mb-md-0">
+      <button class="btn btn-location dropdown-toggle d-flex justify-content-around align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <mat-icon aria-hidden="false" aria-label="Location icon" fontIcon="location_on"></mat-icon> {{city}}
+      </button>
+      <ul class="dropdown-menu">
+        <li class="dropdown-header pointer" (click)="selectCity(cityFromIp)">Current Location: {{cityFromIp}}</li>
+        <li class="dropdown-divider"></li>
+        <li class="dropdown-header">Available Cities</li>
+        <li *ngFor="let rest of allUniqueCities">
+          <a class="dropdown-item pointer" href="#" (click)="selectCity(rest)">{{rest}}</a>
+        </li>
+      </ul>
+    </div>
+    <div class="search d-flex align-items-center flex-grow-1">
+      <input type="text" class="form-control" placeholder="Search for restaurant in your city..." [(ngModel)]="Search" (input)="onSearch()" (keydown.enter)= "onSearch()" />
+    </div>
+    <div class="button ms-3">
+      <button class="btn btn-warning d-flex align-items-center" (click)="onSearch()">
+        <mat-icon aria-hidden="false" aria-label="Search icon" fontIcon="search"></mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,90 @@
+<!-- Updated HTML -->
+<div *ngIf="spinnerVisible; else content" class="spinner flex justify-content-center">
+  <mat-spinner></mat-spinner>
+</div>
+
+
+
+<ng-template #content>
+  <div class="restaurant-container">
+    <!-- Restaurant Header Section -->
+    <div class="restaurant-header">
+      <div id="restaurantImagesCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          <div *ngFor="let x of oneRestaurant.resImages; let i = index" [class]="i === 0 ? 'carousel-item active' : 'carousel-item'">
+            <img [src]="x" class="d-block w-100" alt="Restaurant Image">
+          </div>
+        </div>
+        
+        <button class="carousel-control-prev" type="button" data-bs-target="#restaurantImagesCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#restaurantImagesCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+      <div *ngIf="errorMessage" class="alert alert-info text-center ">{{errorMessage}}</div>
+      <div class="restaurant-info">
+        
+        <div class="info-left">
+          <h1>{{ oneRestaurant.resName }}</h1>
+          <div class="cuisines">
+            <span *ngFor="let cuisine of oneRestaurant.resCuisines" class="badge bg-primary cuisines">{{ cuisine }}</span>
+          </div>
+          <p class="address"><mat-icon class="icon">location_on</mat-icon>{{ oneRestaurant.resAddress }}</p>
+          <p class="description"><mat-icon class="icon">description</mat-icon>{{ oneRestaurant.resDescription }}</p>
+        </div>
+        <div class="info-right">
+          <span class="badge bg-success rating">{{ oneRestaurant.resRating }}</span>
+          <mat-icon class="fav" fontIcon='favorite' (click)="toggleFav()" *ngIf="isFavorite"></mat-icon>
+          <mat-icon class="favblack " fontIcon="favorite_border" (click)="toggleFav()" *ngIf="!isFavorite"></mat-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categories and Menu Section -->
+    <div class="menu-section">
+      <div class="categories  ">
+        <div class="inside position-sticky">
+          <h2>Categories</h2>
+          <div *ngFor="let category of categoryArray" class="category-item pointer" (click)="scrollToCategory(category[0])">
+            {{ category[0] }} ({{ category[1] }})
+          </div>
+        </div>
+      </div>
+      <div class="menu-items">
+        <div *ngFor="let category of categoryWiseDishesArray" class="menu-category" id="{{ category[0] }}">
+          <h3>{{ category[0] }}</h3>
+          <div *ngFor="let item of category[1]" class="menu-item">
+            <div class="item-image">
+              <img [src]="item.dishImage" alt="{{ item.dishName }}">
+              <span class="badge" [ngClass]="item.veg ? 'bg-success' : 'bg-danger'">{{ item.veg ? 'Veg' : 'Non-Veg' }}</span>
+            </div>
+            <div class="item-info">
+              <h4>{{ item.dishName }}</h4>
+              <p class="rating">{{ item.dishRating }} people rated</p>
+              <p class="price">Rs {{ item.dishPrice }}/-</p>
+              <p class="description">{{ item.dishDescription }}</p>
+              <div class="add-to-cart">
+                <button class="btn btn-warning mt-2 addButton" *ngIf="!isInCart(item)" (click)="increaseCount(item)">Add +</button>
+                <div class="quantity-controls mt-2" *ngIf="isInCart(item)">
+                  <button class="btn btn-dark" (click)="decreaseCount(item)">-</button>
+                  <span>{{ getCartItemQuantity(item) }}</span>
+                  <button class="btn btn-dark" (click)="increaseCount(item)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Such Restaurant -->
+    <div class="no-such-restaurant flex justify-content-center align-items-center flex-column mt-5" *ngIf="noSuchRestaurant">
+      <h2>No Such Restaurant.....</h2>
+      <a routerLink="/" class="btn btn-primary mt-3">Go To Home Page</a>
+    </div>
+  </div>
+</ng-template>

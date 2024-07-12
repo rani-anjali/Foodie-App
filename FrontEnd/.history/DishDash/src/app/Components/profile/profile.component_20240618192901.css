@@ -1,0 +1,73 @@
+.profile-container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
+
+.welcome {
+  background-color: #343a40;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.camera-icon {
+  cursor: pointer;
+  font-size: 24px;
+  color: #ffc107 
+  position: absolute ;
+  top: 95px ;
+  right: 207px !important;
+}
+
+.profile-nav {
+  margin-top: 30px;
+}
+
+.card {
+  border: none;
+  border-radius: 8px;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  margin-bottom: 15px;
+  color: #343a40;
+}
+
+.list-group-item {
+  border: none;
+  padding: 15px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.list-group-item i {
+  margin-right: 10px;
+  color: #6c757d;
+}
+
+.list-group-item:hover {
+  background-color: #f8f9fa;
+}
+
+.content-area {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  height: 100%;
+}

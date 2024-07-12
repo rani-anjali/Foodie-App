@@ -1,0 +1,107 @@
+.address-management-container {
+  max-width: 800px;
+  margin: auto;
+}
+
+.add-address-section {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.address-accordion .mat-expansion-panel-header-title {
+  display: flex;
+  align-items: center;
+}
+
+.address-accordion .mat-expansion-panel-header-title mat-icon {
+  margin-right: 8px;
+}
+
+.mat-form-field {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-row .mat-form-field {
+  flex: 1;
+}
+
+.saved-addresses-section {
+  margin-top: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.spinner {
+  height: 100px;
+}
+
+.no-address h3 {
+  color: #6c757d;
+}
+
+.address-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.address-card {
+  flex: 1 1 calc(50% - 20px);
+  min-width: 250px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.address-card .card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.address-card .card-body {
+  padding: 20px;
+}
+
+.card-title {
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.card-text {
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.card-text mat-icon {
+  vertical-align: middle;
+  margin-right: 8px;
+  color: #6c757d;
+}
+
+.card-actions {
+  margin-top: 10px;
+}
+
+.btn {
+  min-width: 100px;
+}
+
+.btn-block {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+}

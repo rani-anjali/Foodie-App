@@ -1,0 +1,116 @@
+<div class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/">
+      <img
+        src="../../../assets/images/Image20240621140921.gif"
+        alt="Logo"
+        class="logo"
+      />
+    </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item" *ngIf="!isLoggedIn">
+          <a
+            class="nav-link pointer"
+            (click)="openLoginDialog('3000ms', '1500ms')"
+            >Log In</a
+          >
+        </li>
+
+        <li class="nav-item dropdown" *ngIf="isLoggedIn">
+          <a
+            class="nav-link dropdown-toggle d-flex align-items-center"
+            href="#"
+            id="navbarDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <img
+              id="profileImage"
+              *ngIf="profilePicture"
+              class="profile-pic rounded-circle"
+              [src]="url"
+              alt="Profile Image"
+            />
+            <img
+            id="profileImage"
+              src="https://w7.pngwing.com/pngs/178/595/png-transparent-user-profile-computer-icons-login-user-avatars.png"
+              alt="Profile"
+              class="profile-pic rounded-circle"
+              *ngIf="!profilePicture"
+            />
+            {{ activeCustomer.customerName.split(" ")[0] }}
+          </a>
+          <ul
+            class="dropdown-menu dropdown-menu-end"
+            aria-labelledby="navbarDropdown"
+          >
+            <li>
+              <a
+                class="dropdown-item d-flex align-items-center"
+                routerLink="customer/profile/favorites"
+              >
+                <mat-icon class="me-2">account_circle</mat-icon> Profile
+              </a>
+            </li>
+            <li>
+              <a
+                class="dropdown-item d-flex align-items-center pointer"
+                (click)="logout()"
+              >
+                <mat-icon class="me-2">exit_to_app</mat-icon> Logout
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li
+          class="nav-item position-relative carting"
+          (mouseover)="showCart = true"
+          (mouseleave)="showCart = false"
+        >
+          <a class="nav-link d-flex align-items-center">
+            <mat-icon
+              class="cart-icon cart carti"
+              [matBadge]="matBadge"
+              matBadgeColor="warn" 
+              >shopping_cart</mat-icon
+            >
+            <span class="ms-1 pointer">Cart</span>
+          </a>
+          <div
+            class="cart-dropdown position-absolute bg-white shadow-sm"
+            *ngIf="showCart"
+          >
+            <app-cart (quantityChange)="noOfItemsChanges($event)"></app-cart>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div
+    class="logout-message alert alert-success"
+    *ngIf="logoutMessageVisible"
+    role="alert"
+  >
+    Logged out successfully!
+  </div>
+
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</div>

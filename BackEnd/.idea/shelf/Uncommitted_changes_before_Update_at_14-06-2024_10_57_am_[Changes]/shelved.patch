@@ -1,0 +1,839 @@
+Index: customersapiservice/src/main/java/com/bej/customersapiservice/domain/Address.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.bej.customersapiservice.domain;\r\n\r\nimport lombok.*;\r\n\r\n@Getter\r\n@Setter\r\n@NoArgsConstructor\r\n@AllArgsConstructor\r\n@ToString\r\npublic class Address {\r\n\r\n    private String address1;\r\n    private String landMark;\r\n    private String city;\r\n    private long pincode;\r\n    private String currentLocation;\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/customersapiservice/src/main/java/com/bej/customersapiservice/domain/Address.java b/customersapiservice/src/main/java/com/bej/customersapiservice/domain/Address.java
+--- a/customersapiservice/src/main/java/com/bej/customersapiservice/domain/Address.java	(revision 15ecb9d1f0bf206a789a37c92444181723a409f9)
++++ b/customersapiservice/src/main/java/com/bej/customersapiservice/domain/Address.java	(date 1718309926381)
+@@ -1,6 +1,9 @@
+ package com.bej.customersapiservice.domain;
+ 
+ import lombok.*;
++import org.springframework.data.annotation.Id;
++
++import java.util.UUID;
+ 
+ @Getter
+ @Setter
+@@ -8,11 +11,10 @@
+ @AllArgsConstructor
+ @ToString
+ public class Address {
+-
++    private String addressId;
+     private String address1;
+     private String landMark;
+     private String city;
+     private long pincode;
+     private String currentLocation;
+-
+ }
+Index: customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.bej.customersapiservice.services;\r\n\r\nimport com.bej.customersapiservice.domain.Customer;\r\nimport com.bej.customersapiservice.exception.CustomerAlreadyExistException;\r\nimport com.bej.customersapiservice.exception.CustomerNotFoundException;\r\nimport com.bej.customersapiservice.exception.RestaurantAlreatExistException;\r\n\r\nimport java.util.List;\r\n\r\npublic interface ICustomerService {\r\n\r\n    public Customer registerCustomer(Customer customer) throws CustomerAlreadyExistException;\r\n    public Customer updateCustomer(Customer customer, String customerId) throws CustomerAlreadyExistException, CustomerNotFoundException;\r\n    public String addFavoriteRestaurant(String resId,String customerId) throws CustomerNotFoundException, RestaurantAlreatExistException;\r\n    public String addFavoriteDish(String obj,String customerId) throws CustomerNotFoundException;\r\n    public List<String> getAllFavRestaurant(String customerId);\r\n    public List<String> getAllFavDishes(String customerId);\r\n    public Customer getCustomerById(String customerId) throws CustomerNotFoundException;\r\n    public boolean deleteFavRestaurant(String customerId,String restId) throws CustomerNotFoundException;\r\n    public boolean deleteFavDish(String customerId,String dishName) throws CustomerNotFoundException;\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java b/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java
+--- a/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java	(revision 15ecb9d1f0bf206a789a37c92444181723a409f9)
++++ b/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java	(date 1718309926508)
+@@ -1,5 +1,6 @@
+ package com.bej.customersapiservice.services;
+ 
++import com.bej.customersapiservice.domain.Address;
+ import com.bej.customersapiservice.domain.Customer;
+ import com.bej.customersapiservice.exception.CustomerAlreadyExistException;
+ import com.bej.customersapiservice.exception.CustomerNotFoundException;
+@@ -18,4 +19,11 @@
+     public Customer getCustomerById(String customerId) throws CustomerNotFoundException;
+     public boolean deleteFavRestaurant(String customerId,String restId) throws CustomerNotFoundException;
+     public boolean deleteFavDish(String customerId,String dishName) throws CustomerNotFoundException;
++
++    public List<Address> fetchAllAddresses(String customerId) throws CustomerNotFoundException;
++    public Address addNewAddress(String customerId, Address address) throws CustomerNotFoundException;
++
++    public boolean deleteAddress(String customerId, String addressId)  throws CustomerNotFoundException;
++
++    public Address makeItPrimary(String customerId, Address address) throws CustomerNotFoundException;
+ }
+Index: customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.bej.customersapiservice.services;\r\n\r\nimport com.bej.customersapiservice.domain.Customer;\r\nimport com.bej.customersapiservice.exception.CustomerAlreadyExistException;\r\nimport com.bej.customersapiservice.exception.CustomerNotFoundException;\r\nimport com.bej.customersapiservice.exception.RestaurantAlreatExistException;\r\nimport com.bej.customersapiservice.proxy.CustomerProxy;\r\nimport com.bej.customersapiservice.respository.CustomerRepo;\r\nimport org.springframework.beans.factory.annotation.Autowired;\r\nimport org.springframework.http.ResponseEntity;\r\nimport org.springframework.stereotype.Service;\r\n\r\nimport java.util.ArrayList;\r\nimport java.util.List;\r\nimport java.util.Optional;\r\nimport java.util.function.Predicate;\r\n\r\n@Service\r\npublic class ImplCustomerService implements ICustomerService {\r\n\r\n    @Autowired\r\n    private CustomerRepo customerRepo;\r\n    @Autowired\r\n    private CustomerProxy customerProxy;\r\n    @Override\r\n    public Customer registerCustomer(Customer customer) throws CustomerAlreadyExistException {\r\n        if(customerRepo.findById(customer.getCustomerId()).isPresent()) {\r\n            throw new CustomerAlreadyExistException();\r\n        }\r\n        if(customer.getCustomerFavDishes() ==  null) {\r\n            customer.setCustomerFavDishes(new ArrayList<>());\r\n        }\r\n        if(customer.getCustomerFavRestaurants() == null) {\r\n            customer.setCustomerFavRestaurants(new ArrayList<>());\r\n        }\r\n//\r\n//        customerProxy.registerCustomer(customer);\r\n//        return customerRepo.save(customer);\r\n        Customer customer1=customerRepo.save(customer);\r\n        if(!(customer1.getCustomerId().isEmpty()))\r\n        {\r\n            ResponseEntity<?> proxyResponse=customerProxy.registerCustomer(customer);\r\n            System.out.println(proxyResponse.getBody());\r\n        }\r\n        return customer1;\r\n    }\r\n\r\n    public Customer updateCustomer(Customer customer, String customerId) throws CustomerNotFoundException {\r\n        if(customerRepo.findById(customerId).isPresent()) {\r\n            return customerRepo.save(customer);\r\n        }\r\n        else {\r\n            throw new CustomerNotFoundException();\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public String addFavoriteRestaurant(String resId,String customerId) throws CustomerNotFoundException, RestaurantAlreatExistException {\r\n        System.out.println(\"Inside\");\r\n        System.out.println(\"Inside Imple :\" + customerRepo.findById(customerId).get() +\"Object :\"+resId);\r\n        Customer optionalCustomer=customerRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);\r\n        if(optionalCustomer.getCustomerFavRestaurants()==null)\r\n        {\r\n            optionalCustomer.setCustomerFavRestaurants(new ArrayList<>());\r\n        }\r\n        List<String> favList = optionalCustomer.getCustomerFavRestaurants();\r\n        boolean isPresent=favList.stream().anyMatch(i->i.equals(resId));\r\n        System.out.println(isPresent);\r\n        if(isPresent)\r\n        {\r\n            throw new RestaurantAlreatExistException();\r\n        }\r\n        favList.add(resId);\r\n        customerRepo.save(optionalCustomer);\r\n        return \"Favourite Restaurant added\";\r\n    }\r\n\r\n    @Override\r\n    public String addFavoriteDish(String restId, String customerId) throws CustomerNotFoundException {\r\n        Customer customer= customerRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);\r\n\r\n        if (customer.getCustomerFavDishes() == null) {\r\n            customer.setCustomerFavDishes(new ArrayList<>());\r\n        }\r\n\r\n        List<String> favDishList = customer.getCustomerFavDishes();\r\n        favDishList.add(restId);\r\n        customerRepo.save(customer);\r\n        return \"Dish added to your favorites...\";\r\n\r\n    }\r\n\r\n    @Override\r\n    public List<String> getAllFavRestaurant(String customerId) {\r\n\r\n        Optional<Customer> restCustomer = customerRepo.findById(customerId);\r\n        System.out.println(restCustomer.get());\r\n        return restCustomer.get().getCustomerFavRestaurants();\r\n    }\r\n\r\n    @Override\r\n    public List<String> getAllFavDishes(String customerId) {\r\n        Optional<Customer> restCustomer = customerRepo.findById(customerId);\r\n        System.out.println(restCustomer.get());\r\n        return restCustomer.get().getCustomerFavDishes();\r\n    }\r\n\r\n    @Override\r\n    public Customer getCustomerById(String customerId) throws CustomerNotFoundException {\r\n        return customerRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);\r\n    }\r\n\r\n    @Override\r\n    public boolean deleteFavRestaurant(String customerId,String resId) throws CustomerNotFoundException {\r\n       boolean isDeleted=false;\r\n       Customer customer=customerRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);\r\n       List<String> favRestList = customer.getCustomerFavRestaurants();\r\n       System.out.println(\"Before deletion :\"+favRestList);\r\n       for(int i=0;i<favRestList.size();i++)\r\n       {\r\n           if(favRestList.get(i).equals(resId)){\r\n               favRestList.remove(resId);\r\n               isDeleted=true;\r\n           }\r\n\r\n       }\r\n       System.out.println(\"After deletion :\"+favRestList);\r\n       customer.setCustomerFavRestaurants(favRestList);\r\n       customerRepo.save(customer);\r\n       return isDeleted;\r\n    }\r\n    public boolean deleteFavDish(String customerId,String dish) throws CustomerNotFoundException {\r\n        boolean isDeleted=false;\r\n        Optional<Customer> optionalCustomer=customerRepo.findById(customerId);\r\n\r\n        if(optionalCustomer.isEmpty())\r\n        {\r\n            throw new CustomerNotFoundException();\r\n        }\r\n        Customer customer=optionalCustomer.get();\r\n\r\n        List<String> favList = customer.getCustomerFavDishes();\r\n        favList.remove(dish);\r\n        customer.setCustomerFavDishes(favList);\r\n        customerRepo.save(customer);\r\n        isDeleted=true;\r\n\r\n        return isDeleted;\r\n    }\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java b/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java
+--- a/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java	(revision 15ecb9d1f0bf206a789a37c92444181723a409f9)
++++ b/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java	(date 1718341053616)
+@@ -1,5 +1,6 @@
+ package com.bej.customersapiservice.services;
+ 
++import com.bej.customersapiservice.domain.Address;
+ import com.bej.customersapiservice.domain.Customer;
+ import com.bej.customersapiservice.exception.CustomerAlreadyExistException;
+ import com.bej.customersapiservice.exception.CustomerNotFoundException;
+@@ -14,6 +15,7 @@
+ import java.util.List;
+ import java.util.Optional;
+ import java.util.function.Predicate;
++import java.util.stream.Collectors;
+ 
+ @Service
+ public class ImplCustomerService implements ICustomerService {
+@@ -148,4 +150,60 @@
+         return isDeleted;
+     }
+ 
++    @Override
++    public List<Address> fetchAllAddresses(String customerId) throws CustomerNotFoundException {
++
++        Customer customer = customerRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);
++        if(customer.getCustomerAddress() == null) {
++            customer.setCustomerAddress(new ArrayList<>());
++        }
++        return customer.getCustomerAddress();
++
++    }
++
++    @Override
++    public Address addNewAddress(String customerId, Address address) throws CustomerNotFoundException {
++        Customer customer = customerRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);
++        if(customer.getCustomerAddress() == null) {
++            customer.setCustomerAddress(new ArrayList<>());
++        }
++
++        List<Address> addressList = customer.getCustomerAddress();
++        addressList.add(0,address);
++        customer.setCustomerAddress(addressList);
++        customerRepo.save(customer);
++        return customer.getCustomerAddress().get(0);
++    }
++
++
++    @Override
++    public boolean deleteAddress(String customerId, String addressId)  throws CustomerNotFoundException {
++        Customer customer = customerRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);
++        List<Address> addressList = customer.getCustomerAddress();
++        Address address = addressList.stream().filter(i -> i.getAddressId().equals(addressId)).collect(Collectors.toList()).get(0);
++        addressList.remove(address);
++        customer.setCustomerAddress(addressList);
++        customerRepo.save(customer);
++        return addressList.remove(address);
++    }
++
++    @Override
++    public Address makeItPrimary(String customerId, Address address) throws CustomerNotFoundException {
++        Customer customer = customerRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);
++        List<Address> addressList = customer.getCustomerAddress();
++//        addressList.stream().filter(i -> i.getAddressId().equals(address.getAddressId())).peek(
++//                i -> i.
++//        )
++//        addressList.remove(address);
++       int index =  addressList.indexOf(address);
++        System.out.println("Index of address "+index);
++        System.out.println("Deleted or not "+addressList.remove(address) );
++        addressList.set(0,address);
++        System.out.println("Address :" +address);
++        customer.setCustomerAddress(addressList);
++        customerRepo.save(customer);
++        return addressList.get(0);
++
++    }
++
+ }
+Index: customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.bej.customersapiservice.controller;\r\n\r\nimport com.bej.customersapiservice.domain.Customer;\r\nimport com.bej.customersapiservice.emails.IGenerateEmails;\r\nimport com.bej.customersapiservice.exception.CustomerAlreadyExistException;\r\nimport com.bej.customersapiservice.exception.CustomerNotFoundException;\r\nimport com.bej.customersapiservice.exception.RestaurantAlreatExistException;\r\nimport com.bej.customersapiservice.services.EmailService;\r\nimport com.bej.customersapiservice.services.ICustomerService;\r\nimport jakarta.servlet.http.HttpServletRequest;\r\nimport jakarta.ws.rs.Path;\r\nimport lombok.extern.slf4j.Slf4j;\r\nimport org.springframework.beans.factory.annotation.Autowired;\r\nimport org.springframework.data.annotation.Id;\r\nimport org.springframework.http.HttpStatus;\r\nimport org.springframework.http.ResponseEntity;\r\nimport org.springframework.web.bind.annotation.*;\r\n@Slf4j\r\n@RestController\r\n@RequestMapping(\"/api/v2\")\r\n@CrossOrigin\r\npublic class CustomerController {\r\n\r\n    @Autowired\r\n    private ICustomerService iCustomerService;\r\n\r\n    @Autowired\r\n    private EmailService emailService;\r\n\r\n    @Autowired\r\n    private IGenerateEmails iGenerateEmails;\r\n\r\n    @PostMapping(\"/register\")\r\n    public ResponseEntity registerCustomer(@RequestBody Customer customer) {\r\n        try {\r\n            ResponseEntity<?> response =  new ResponseEntity(iCustomerService.registerCustomer(customer), HttpStatus.CREATED);\r\n            emailService.sendEmail(customer.getCustomerEmail(),\"Welcome To DishDash\", iGenerateEmails.generateWelcomeEmail(customer.getCustomerName(), customer.getCustomerEmail(), customer.getCustomerPassword()));\r\n            return response;\r\n        } catch (CustomerAlreadyExistException e) {\r\n            return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);\r\n        }\r\n    }\r\n\r\n    @PutMapping(\"/customers/update\")\r\n    public ResponseEntity updateCustomer(@RequestBody Customer customer, HttpServletRequest request) {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        try {\r\n            return new ResponseEntity(iCustomerService.updateCustomer(customer, customerId), HttpStatus.OK);\r\n        } catch (Exception e) {\r\n            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);\r\n        }\r\n    }\r\n\r\n    @PutMapping(\"/customers/addfavres\")\r\n    public ResponseEntity updateFavRest(@RequestBody String restId, HttpServletRequest request) throws CustomerNotFoundException, RestaurantAlreatExistException {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.addFavoriteRestaurant(restId,customerId),HttpStatus.OK);\r\n    }\r\n\r\n    @PutMapping(\"/customers/addfavdish\")\r\n    public ResponseEntity updateFavDish(@RequestBody String dishName, HttpServletRequest request) throws CustomerNotFoundException {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.addFavoriteDish(dishName,customerId),HttpStatus.OK);\r\n    }\r\n\r\n    @GetMapping(\"/customers/restaurant\")\r\n    public ResponseEntity fetchFavRest(HttpServletRequest request)\r\n    {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.getAllFavRestaurant(customerId),HttpStatus.OK);\r\n    }\r\n    @GetMapping(\"/customers/dishes\")\r\n    public ResponseEntity fetchFavDish(HttpServletRequest request)\r\n    {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.getAllFavDishes(customerId),HttpStatus.OK);\r\n    }\r\n    @GetMapping(\"/customers/eachcustomer\")\r\n    public ResponseEntity<?> fetchByJwtToken(HttpServletRequest request) throws CustomerNotFoundException {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.getCustomerById(customerId),HttpStatus.OK);\r\n    }\r\n    @DeleteMapping(\"/customers/deletedish/{dishName}\")\r\n    public ResponseEntity<?> deleteFavDish(@PathVariable String dish, HttpServletRequest request) throws CustomerNotFoundException {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.deleteFavDish(customerId,dish),HttpStatus.OK);\r\n    }\r\n    @DeleteMapping(\"/customers/deleterestaurant\")\r\n    public ResponseEntity<?> deleteFavRest(@RequestParam String resId, HttpServletRequest request) {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        try{\r\n            log.info(\"Inside customers/deletedrestaurant controller\");\r\n            return new ResponseEntity<>(iCustomerService.deleteFavRestaurant(customerId,resId),HttpStatus.OK);\r\n        }catch(CustomerNotFoundException ex)\r\n        {\r\n            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);\r\n        }\r\n\r\n    }\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java b/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java
+--- a/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java	(revision 15ecb9d1f0bf206a789a37c92444181723a409f9)
++++ b/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java	(date 1718310170566)
+@@ -1,5 +1,6 @@
+ package com.bej.customersapiservice.controller;
+ 
++import com.bej.customersapiservice.domain.Address;
+ import com.bej.customersapiservice.domain.Customer;
+ import com.bej.customersapiservice.emails.IGenerateEmails;
+ import com.bej.customersapiservice.exception.CustomerAlreadyExistException;
+@@ -98,4 +99,28 @@
+ 
+     }
+ 
++    @GetMapping("/customers/addresses/all")
++    public ResponseEntity fetchAllAddresses(HttpServletRequest request) throws CustomerNotFoundException {
++        String customerId = (String) request.getAttribute("customerId");
++        return new ResponseEntity<>(iCustomerService.fetchAllAddresses(customerId),HttpStatus.OK);
++    }
++
++    @PutMapping("/customers/addresses/addnew")
++    public ResponseEntity addNewAddress(@RequestBody Address address, HttpServletRequest request) throws CustomerNotFoundException {
++        String customerId = (String) request.getAttribute("customerId");
++        return new ResponseEntity<>(iCustomerService.addNewAddress(customerId, address),HttpStatus.CREATED);
++    }
++
++    @DeleteMapping("/customers/deleteone/{addressId}")
++    public ResponseEntity removeAddress(@PathVariable String addressId, HttpServletRequest request) throws CustomerNotFoundException {
++        String customerId = (String) request.getAttribute("customerId");
++        return new ResponseEntity<>(iCustomerService.deleteAddress(customerId, addressId),HttpStatus.OK);
++    }
++
++    @PutMapping("/customers/addresses/makeitprimary")
++    public ResponseEntity makeItPrimary(@RequestBody Address address, HttpServletRequest request) throws CustomerNotFoundException {
++        String customerId = (String) request.getAttribute("customerId");
++        return new ResponseEntity<>(iCustomerService.makeItPrimary(customerId, address),HttpStatus.OK);
++    }
++
+ }
+Index: customersapiservice/src/main/java/com/bej/customersapiservice/respository/CustomerRepo.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.bej.customersapiservice.respository;\r\n\r\nimport com.bej.customersapiservice.domain.Customer;\r\nimport org.springframework.data.mongodb.repository.MongoRepository;\r\n\r\npublic interface CustomerRepo extends MongoRepository<Customer, String> {\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/customersapiservice/src/main/java/com/bej/customersapiservice/respository/CustomerRepo.java b/customersapiservice/src/main/java/com/bej/customersapiservice/respository/CustomerRepo.java
+--- a/customersapiservice/src/main/java/com/bej/customersapiservice/respository/CustomerRepo.java	(revision 15ecb9d1f0bf206a789a37c92444181723a409f9)
++++ b/customersapiservice/src/main/java/com/bej/customersapiservice/respository/CustomerRepo.java	(date 1718308507181)
+@@ -2,6 +2,8 @@
+ 
+ import com.bej.customersapiservice.domain.Customer;
+ import org.springframework.data.mongodb.repository.MongoRepository;
++import org.springframework.data.mongodb.repository.Query;
+ 
+ public interface CustomerRepo extends MongoRepository<Customer, String> {
+-}
++
++}
+\ No newline at end of file
+Index: ../FrontEnd/DishDash/package.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{\r\n  \"name\": \"dish-dash\",\r\n  \"version\": \"0.0.0\",\r\n  \"scripts\": {\r\n    \"ng\": \"ng\",\r\n    \"start\": \"ng serve\",\r\n    \"build\": \"ng build\",\r\n    \"watch\": \"ng build --watch --configuration development\",\r\n    \"test\": \"ng test\"\r\n  },\r\n  \"private\": true,\r\n  \"dependencies\": {\r\n    \"@angular/animations\": \"^18.0.0\",\r\n    \"@angular/cdk\": \"^18.0.2\",\r\n    \"@angular/common\": \"^18.0.0\",\r\n    \"@angular/compiler\": \"^18.0.0\",\r\n    \"@angular/core\": \"^18.0.0\",\r\n    \"@angular/forms\": \"^18.0.0\",\r\n    \"@angular/material\": \"^18.0.2\",\r\n    \"@angular/platform-browser\": \"^18.0.0\",\r\n    \"@angular/platform-browser-dynamic\": \"^18.0.0\",\r\n    \"@angular/router\": \"^18.0.0\",\r\n    \"bootstrap\": \"^5.3.3\",\r\n    \"ngx-cookie-service\": \"^18.0.0\",\r\n    \"rxjs\": \"~7.8.0\",\r\n    \"tslib\": \"^2.3.0\",\r\n    \"zone.js\": \"~0.14.3\"\r\n  },\r\n  \"devDependencies\": {\r\n    \"@angular-devkit/build-angular\": \"^18.0.3\",\r\n    \"@angular/cli\": \"^18.0.3\",\r\n    \"@angular/compiler-cli\": \"^18.0.0\",\r\n    \"@types/jasmine\": \"~5.1.0\",\r\n    \"jasmine-core\": \"~5.1.0\",\r\n    \"karma\": \"~6.4.0\",\r\n    \"karma-chrome-launcher\": \"~3.2.0\",\r\n    \"karma-coverage\": \"~2.2.0\",\r\n    \"karma-jasmine\": \"~5.1.0\",\r\n    \"karma-jasmine-html-reporter\": \"~2.1.0\",\r\n    \"typescript\": \"~5.4.2\"\r\n  }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/package.json b/../FrontEnd/DishDash/package.json
+--- a/../FrontEnd/DishDash/package.json	(revision 15ecb9d1f0bf206a789a37c92444181723a409f9)
++++ b/../FrontEnd/DishDash/package.json	(date 1718314911276)
+@@ -24,6 +24,7 @@
+     "ngx-cookie-service": "^18.0.0",
+     "rxjs": "~7.8.0",
+     "tslib": "^2.3.0",
++    "uuid": "^10.0.0",
+     "zone.js": "~0.14.3"
+   },
+   "devDependencies": {
+Index: ../FrontEnd/DishDash/src/app/app-routing.module.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import { NgModule } from '@angular/core';\r\nimport { RouterModule, Routes } from '@angular/router';\r\nimport { NavigationComponent } from './Components/navigation/navigation.component';\r\nimport { PagenotfoundComponent } from './Components/pagenotfound/pagenotfound.component';\r\nimport { RestaurantviewComponent } from './Components/restaurantview/restaurantview.component';\r\nimport { HomepageComponent } from './Components/homepage/homepage.component';\r\nimport { LoginComponent } from './Components/login/login.component';\r\nimport { RegisterComponent } from './Components/register/register.component';\r\nimport { CutomerfavouriteComponent } from './Components/cutomerfavourite/cutomerfavourite.component';\r\nimport { ProfileComponent } from './Components/profile/profile.component';\r\nimport { EditProfileComponent } from './Components/edit-profile/edit-profile.component';\r\n\r\nconst routes: Routes = [\r\n{path:'', component: HomepageComponent},\r\n{path:'home', component: HomepageComponent},\r\n{path:'customer/profile', component:ProfileComponent, children: [\r\n  {path:'edit-profile', component: EditProfileComponent},\r\n  {path:'favorites', component: CutomerfavouriteComponent},\r\n]},\r\n{path:'customer/favourites', component: CutomerfavouriteComponent},\r\n{path:':city/restaurants/:resid', component: RestaurantviewComponent},\r\n{path:'**', component: PagenotfoundComponent}\r\n\r\n];\r\n\r\n@NgModule({\r\n  imports: [RouterModule.forRoot(routes)],\r\n  exports: [RouterModule]\r\n})\r\nexport class AppRoutingModule { }\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/app-routing.module.ts b/../FrontEnd/DishDash/src/app/app-routing.module.ts
+--- a/../FrontEnd/DishDash/src/app/app-routing.module.ts	(revision 15ecb9d1f0bf206a789a37c92444181723a409f9)
++++ b/../FrontEnd/DishDash/src/app/app-routing.module.ts	(date 1718279753549)
+@@ -8,15 +8,11 @@
+ import { RegisterComponent } from './Components/register/register.component';
+ import { CutomerfavouriteComponent } from './Components/cutomerfavourite/cutomerfavourite.component';
+ import { ProfileComponent } from './Components/profile/profile.component';
+-import { EditProfileComponent } from './Components/edit-profile/edit-profile.component';
+ 
+ const routes: Routes = [
+ {path:'', component: HomepageComponent},
+ {path:'home', component: HomepageComponent},
+-{path:'customer/profile', component:ProfileComponent, children: [
+-  {path:'edit-profile', component: EditProfileComponent},
+-  {path:'favorites', component: CutomerfavouriteComponent},
+-]},
++{path:'customer/profile', component:ProfileComponent},
+ {path:'customer/favourites', component: CutomerfavouriteComponent},
+ {path:':city/restaurants/:resid', component: RestaurantviewComponent},
+ {path:'**', component: PagenotfoundComponent}
+Index: ../FrontEnd/DishDash/src/app/Model/address.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>export class address {\r\n    address1:string\r\n    landMark:string\r\n    city:string\r\n    pincode:number\r\n    currentLocation:string\r\n\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Model/address.ts b/../FrontEnd/DishDash/src/app/Model/address.ts
+--- a/../FrontEnd/DishDash/src/app/Model/address.ts	(revision 15ecb9d1f0bf206a789a37c92444181723a409f9)
++++ b/../FrontEnd/DishDash/src/app/Model/address.ts	(date 1718314025295)
+@@ -1,8 +1,7 @@
+ export class address {
++    addressId:string
+     address1:string
+     landMark:string
+     city:string
+     pincode:number
+-    currentLocation:string
+-
+-}
+\ No newline at end of file
++    curre
+\ No newline at end of file
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"9c8a6dba-7c8c-426b-ad82-e45f53e77f5c\" name=\"Changes\" comment=\"\">\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/UserAuthenticationService/src/main/resources/application.properties\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/UserAuthenticationService/src/main/resources/application.properties\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/login/login.component.ts\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/login/login.component.ts\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Interface\" />\r\n        <option value=\"Class\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$/..\" />\r\n  </component>\r\n  <component name=\"MarkdownSettingsMigration\">\r\n    <option name=\"stateVersion\" value=\"1\" />\r\n  </component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 7\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"2hRdb5bzKy99WtrSghQJjDoSedT\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">{\r\n  &quot;keyToString&quot;: {\r\n    &quot;Application.ApiGateawayApplication.executor&quot;: &quot;Run&quot;,\r\n    &quot;Application.CartServiceApiApplication.executor&quot;: &quot;Run&quot;,\r\n    &quot;Application.CustomersapiserviceApplication.executor&quot;: &quot;Run&quot;,\r\n    &quot;Application.EurekaDiscoveryServerApplication.executor&quot;: &quot;Run&quot;,\r\n    &quot;Application.RestaurantServiceApplication.executor&quot;: &quot;Run&quot;,\r\n    &quot;Application.UserAuthenticationServiceApplication.executor&quot;: &quot;Run&quot;,\r\n    &quot;Application.abc.executor&quot;: &quot;Run&quot;,\r\n    &quot;Maven.FoodieApp [clean].executor&quot;: &quot;Run&quot;,\r\n    &quot;Maven.FoodieApp [compile].executor&quot;: &quot;Run&quot;,\r\n    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,\r\n    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,\r\n    &quot;git-widget-placeholder&quot;: &quot;dev-v1&quot;,\r\n    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,\r\n    &quot;last_opened_file_path&quot;: &quot;C:/Niit/Course_12/Sprint-4/Challenge/muzix&quot;,\r\n    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;\r\n  }\r\n}</component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"CopyFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Users\\Avish Madaan\\Desktop\\NIIT\\Phase 2\\Course 14 - Capstone Project\\major-capstone-project\\FoodieApp\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunManager\">\r\n    <configuration name=\"CartServiceApiApplication\" type=\"Application\" factoryName=\"Application\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"com.bej.CartServiceApiApplication\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"com.bej.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"CustomersapiserviceApplication\" type=\"Application\" factoryName=\"Application\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"com.bej.customersapiservice.CustomersapiserviceApplication\" />\r\n      <module name=\"customersapiservice\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"com.bej.customersapiservice.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"EurekaDiscoveryServerApplication\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"com.example.EurekaDiscoveryServer.EurekaDiscoveryServerApplication\" />\r\n      <module name=\"EurekaDiscoveryServer\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"com.example.EurekaDiscoveryServer.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"RestaurantServiceApplication\" type=\"Application\" factoryName=\"Application\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"com.example.RestaurantService.RestaurantServiceApplication\" />\r\n      <module name=\"RestaurantService\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"com.example.RestaurantService.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"UserAuthenticationServiceApplication\" type=\"Application\" factoryName=\"Application\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"com.example.UserAuthenticationService.UserAuthenticationServiceApplication\" />\r\n      <module name=\"UserAuthenticationService\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"com.example.UserAuthenticationService.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"My Combo\" type=\"CompoundRunConfigurationType\">\r\n      <toRun name=\"CartServiceApiApplication\" type=\"Application\" />\r\n      <toRun name=\"CustomersapiserviceApplication\" type=\"Application\" />\r\n      <toRun name=\"RestaurantServiceApplication\" type=\"Application\" />\r\n      <toRun name=\"UserAuthenticationServiceApplication\" type=\"Application\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <list>\r\n      <item itemvalue=\"Application.UserAuthenticationServiceApplication\" />\r\n      <item itemvalue=\"Application.CartServiceApiApplication\" />\r\n      <item itemvalue=\"Application.RestaurantServiceApplication\" />\r\n      <item itemvalue=\"Application.CustomersapiserviceApplication\" />\r\n      <item itemvalue=\"Application.EurekaDiscoveryServerApplication\" />\r\n      <item itemvalue=\"Compound.My Combo\" />\r\n    </list>\r\n    <recent_temporary>\r\n      <list>\r\n        <item itemvalue=\"Application.EurekaDiscoveryServerApplication\" />\r\n      </list>\r\n    </recent_temporary>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"9c8a6dba-7c8c-426b-ad82-e45f53e77f5c\" name=\"Changes\" comment=\"\" />\r\n      <created>1717560898011</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1717560898011</updated>\r\n    </task>\r\n    <servers />\r\n  </component>\r\n  <component name=\"XSLT-Support.FileAssociations.UIState\">\r\n    <expand />\r\n    <select />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 15ecb9d1f0bf206a789a37c92444181723a409f9)
++++ b/.idea/workspace.xml	(date 1718340797920)
+@@ -6,9 +6,25 @@
+   <component name="ChangeListManager">
+     <list default="true" id="9c8a6dba-7c8c-426b-ad82-e45f53e77f5c" name="Changes" comment="">
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/UserAuthenticationService/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/UserAuthenticationService/src/main/resources/application.properties" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/login/login.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/login/login.component.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/domain/Address.java" beforeDir="false" afterPath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/domain/Address.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/respository/CustomerRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/respository/CustomerRepo.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/package-lock.json" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/package.json" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.html" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/edit-profile/edit-profile.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/edit-profile/edit-profile.component.html" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/edit-profile/edit-profile.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/edit-profile/edit-profile.component.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.html" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/profile/profile.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/profile/profile.component.html" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/profile/profile.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/profile/profile.component.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Model/address.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Model/address.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Model/customer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Model/customer.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/app-routing.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/app-routing.module.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/app.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/app.module.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/services/user.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/services/user.service.ts" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -53,7 +69,7 @@
+     &quot;git-widget-placeholder&quot;: &quot;dev-v1&quot;,
+     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+     &quot;last_opened_file_path&quot;: &quot;C:/Niit/Course_12/Sprint-4/Challenge/muzix&quot;,
+-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
++    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.tools&quot;
+   }
+ }</component>
+   <component name="RecentsManager">
+@@ -61,7 +77,7 @@
+       <recent name="C:\Users\Avish Madaan\Desktop\NIIT\Phase 2\Course 14 - Capstone Project\major-capstone-project\FoodieApp" />
+     </key>
+   </component>
+-  <component name="RunManager">
++  <component name="RunManager" selected="Application.CustomersapiserviceApplication">
+     <configuration name="CartServiceApiApplication" type="Application" factoryName="Application" nameIsGenerated="true">
+       <option name="MAIN_CLASS_NAME" value="com.bej.CartServiceApiApplication" />
+       <extension name="coverage">
+@@ -157,6 +173,21 @@
+       <updated>1717560898011</updated>
+     </task>
+     <servers />
++  </component>
++  <component name="UnknownFeatures">
++    <option featureType="dependencySupport" implementationName="java:org.springframework:spring-core" />
++    <option featureType="dependencySupport" implementationName="java:jakarta.validation:jakarta.validation-api" />
++    <option featureType="dependencySupport" implementationName="java:io.projectreactor:reactor-core" />
++    <option featureType="dependencySupport" implementationName="java:org.springframework.data:spring-data-commons" />
++    <option featureType="dependencySupport" implementationName="executable:kubectl" />
++    <option featureType="dependencySupport" implementationName="java:org.springframework.cloud:spring-cloud-context" />
++    <option featureType="dependencySupport" implementationName="java:org.hibernate.validator:hibernate-validator" />
++    <option featureType="dependencySupport" implementationName="java:org.springframework:spring-webmvc" />
++    <option featureType="dependencySupport" implementationName="java:org.projectlombok:lombok" />
++    <option featureType="dependencySupport" implementationName="executable:docker" />
++    <option featureType="dependencySupport" implementationName="java:jakarta.persistence:jakarta.persistence-api" />
++    <option featureType="dependencySupport" implementationName="java:jakarta.ws.rs:jakarta.ws.rs-api" />
++    <option featureType="dependencySupport" implementationName="java:org.springframework.boot:spring-boot" />
+   </component>
+   <component name="XSLT-Support.FileAssociations.UIState">
+     <expand />
+Index: ../FrontEnd/DishDash/src/app/Components/edit-profile/edit-profile.component.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import { Component } from '@angular/core';\r\nimport { AbstractControl, FormBuilder, Validators } from '@angular/forms';\r\nimport { Router } from '@angular/router';\r\nimport { UserService } from '../../services/user.service';\r\n\r\n@Component({\r\n  selector: 'app-edit-profile',\r\n  templateUrl: './edit-profile.component.html',\r\n  styleUrl: './edit-profile.component.css'\r\n})\r\nexport class EditProfileComponent {\r\n  uniqueId: string = '';\r\n\r\n  constructor(private fb: FormBuilder, private userService: UserService, private router: Router) {}\r\n\r\n  registerForm = this.fb.group({\r\n    customerProfilePic: [''],\r\n    customerPassword: ['', [Validators.required, Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$/)]],\r\n    confirmPassword: ['', [Validators.required, this.confirmPasswordValidator()]]\r\n  }, { validators: this.checkPasswordMismatch });\r\n\r\n  get customerPassword() {\r\n    return this.registerForm.get('customerPassword');\r\n  }\r\n\r\n  get confirmPassword() {\r\n    return this.registerForm.get('confirmPassword');\r\n  }\r\n\r\n  get customerProfilePic() {\r\n    return this.registerForm.get('customerProfilePic');\r\n  }\r\n\r\n  generateUniqueKey() {\r\n    const timestamp = new Date().getTime();\r\n    const randomNumber = Math.floor(Math.random() * 1000);\r\n    return `cus-${timestamp}-${randomNumber}`;\r\n  }\r\n\r\n  onSubmit() {\r\n    if (this.registerForm.invalid) {\r\n      return;\r\n    }\r\n\r\n    const registerCustomer = {\r\n      ...this.registerForm.value,\r\n      customerProfilePic: this.registerForm.get('customerProfilePic')!.value\r\n    };\r\n\r\n    console.log(registerCustomer);\r\n\r\n    // this.userService.updateUser(registerCustomer).subscribe({\r\n    //   next: data => {\r\n    //     console.log('Update successful', data);\r\n    //   },\r\n    //   error: err => {\r\n    //     console.log('Error updating profile', err);\r\n    //   }\r\n    // });\r\n  }\r\n\r\n  checkPasswordMismatch(c: AbstractControl) {\r\n    const password = c.get('customerPassword');\r\n    const confirmPass = c.get('confirmPassword');\r\n    if (!password?.value || !confirmPass?.value) {\r\n      return null;\r\n    }\r\n    return password.value === confirmPass.value ? null : { passwordMismatch: true };\r\n  }\r\n\r\n  confirmPasswordValidator() {\r\n    return (control: AbstractControl) => {\r\n      if (!control.parent || !control) {\r\n        return null;\r\n      }\r\n\r\n      const password = control.parent.get('customerPassword');\r\n      const confirmPassword = control;\r\n\r\n      if (!password || !confirmPassword) {\r\n        return null;\r\n      }\r\n\r\n      if (confirmPassword.value === '') {\r\n        return { required: true };\r\n      }\r\n\r\n      if (password.value !== confirmPassword.value) {\r\n        return { passwordMismatch: true };\r\n      }\r\n\r\n      return null;\r\n    };\r\n  }\r\n\r\n  addAddress() {\r\n    this.router.navigate(['/components/address-form']);\r\n  }\r\n  \r\n\r\n  // updateProfile(updatedProfile: any) {\r\n  //   this.userService.updateUser(updatedProfile).subscribe(() => {\r\n  //     // Optionally, display a success message or navigate to another page\r\n  //   });\r\n  // }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/edit-profile/edit-profile.component.ts b/../FrontEnd/DishDash/src/app/Components/edit-profile/edit-profile.component.ts
+--- a/../FrontEnd/DishDash/src/app/Components/edit-profile/edit-profile.component.ts	(revision 15ecb9d1f0bf206a789a37c92444181723a409f9)
++++ b/../FrontEnd/DishDash/src/app/Components/edit-profile/edit-profile.component.ts	(date 1718307234790)
+@@ -1,34 +1,74 @@
+-import { Component } from '@angular/core';
++import { Component, OnInit } from '@angular/core';
+ import { AbstractControl, FormBuilder, Validators } from '@angular/forms';
+ import { Router } from '@angular/router';
+ import { UserService } from '../../services/user.service';
++import { CookieService } from 'ngx-cookie-service';
++import { customer } from '../../Model/customer';
+ 
+ @Component({
+   selector: 'app-edit-profile',
+   templateUrl: './edit-profile.component.html',
+   styleUrl: './edit-profile.component.css'
+ })
+-export class EditProfileComponent {
++export class EditProfileComponent implements OnInit {
++
+   uniqueId: string = '';
++  customerJwt:string=''
++  activeCustomer:customer ={
++    customerName: '',
++    customerEmail: '',
++    customerPassword: '',
++    customerPhone: 0
++  }
++
++  constructor(private fb: FormBuilder, private userService: UserService, private router: Router, private cookieService:CookieService) {}
++  ngOnInit(): void {
++    this.customerJwt = this.cookieService.get("token")
++    this.fetchActiveCustomer()
++   
++  }
++
++  //fetching Active Customer
++  fetchActiveCustomer() {
+ 
+-  constructor(private fb: FormBuilder, private userService: UserService, private router: Router) {}
++    this.userService.fetchCustomerByJwt(this.customerJwt).subscribe({
++      next:data => {
++        this.activeCustomer = data;
++      },
++      error:e => {
++        console.log("Error while fetching Customer")
++        console.log(e);
++      }
++    })
+ 
+-  registerForm = this.fb.group({
+-    customerProfilePic: [''],
+-    customerPassword: ['', [Validators.required, Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)]],
+-    confirmPassword: ['', [Validators.required, this.confirmPasswordValidator()]]
++  }
++
++  updateForm = this.fb.group({
++    customerName: [this.activeCustomer.customerName],
++    customerPhone:[this.activeCustomer.customerPhone],
++    customerPassword: [this.activeCustomer.customerPassword, [Validators.required, Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)]],
++    confirmPassword: [this.activeCustomer.customerPassword, [Validators.required, this.confirmPasswordValidator()]]
+   }, { validators: this.checkPasswordMismatch });
+ 
+   get customerPassword() {
+-    return this.registerForm.get('customerPassword');
++    return this.updateForm.get('customerPassword');
++  }
++  get customerName() {
++    return this.updateForm.get('customerName');
+   }
++
++  get customerPhone() {
++    return this.updateForm.get('customerName');
++  }
++  
++
+ 
+   get confirmPassword() {
+-    return this.registerForm.get('confirmPassword');
++    return this.updateForm.get('confirmPassword');
+   }
+ 
+   get customerProfilePic() {
+-    return this.registerForm.get('customerProfilePic');
++    return this.updateForm.get('customerProfilePic');
+   }
+ 
+   generateUniqueKey() {
+@@ -38,13 +78,13 @@
+   }
+ 
+   onSubmit() {
+-    if (this.registerForm.invalid) {
++    if (this.updateForm.invalid) {
+       return;
+     }
+ 
+     const registerCustomer = {
+-      ...this.registerForm.value,
+-      customerProfilePic: this.registerForm.get('customerProfilePic')!.value
++      ...this.updateForm.value,
++      customerProfilePic: this.updateForm.get('customerProfilePic')!.value
+     };
+ 
+     console.log(registerCustomer);
+@@ -60,47 +100,4 @@
+   }
+ 
+   checkPasswordMismatch(c: AbstractControl) {
+-    const password = c.get('customerPassword');
+-    const confirmPass = c.get('confirmPassword');
+-    if (!password?.value || !confirmPass?.value) {
+-      return null;
+-    }
+-    return password.value === confirmPass.value ? null : { passwordMismatch: true };
+-  }
+-
+-  confirmPasswordValidator() {
+-    return (control: AbstractControl) => {
+-      if (!control.parent || !control) {
+-        return null;
+-      }
+-
+-      const password = control.parent.get('customerPassword');
+-      const confirmPassword = control;
+-
+-      if (!password || !confirmPassword) {
+-        return null;
+-      }
+-
+-      if (confirmPassword.value === '') {
+-        return { required: true };
+-      }
+-
+-      if (password.value !== confirmPassword.value) {
+-        return { passwordMismatch: true };
+-      }
+-
+-      return null;
+-    };
+-  }
+-
+-  addAddress() {
+-    this.router.navigate(['/components/address-form']);
+-  }
+-  
+-
+-  // updateProfile(updatedProfile: any) {
+-  //   this.userService.updateUser(updatedProfile).subscribe(() => {
+-  //     // Optionally, display a success message or navigate to another page
+-  //   });
+-  // }
+-}
++    const password = c.get('customer
+\ No newline at end of file
+Index: ../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><div class=\"nav flex justify-content align-items\">\r\n  <div class=\"left\">\r\n    <img\r\n      src=\"https://via.placeholder.com/150x40\"\r\n      alt=\"Placeholder Image\"\r\n      class=\"logo\"\r\n      routerLink=\"/\"\r\n    />\r\n  </div>\r\n\r\n  <div class=\"right flex justify-content-center gap-4 align-items\">\r\n    <div\r\n      class=\"logout flex justify-center align-items bg-white border-black gap-1\"\r\n      *ngIf=\"isLoggedIn\"\r\n    >\r\n      <div class=\"profile\">\r\n        <img src=\"https://via.placeholder.com/40x40 \" alt=\"Profile\" />\r\n      </div>\r\n      <div class=\"name\">{{ activeCustomer.customerName.split(\" \")[0] }}</div>\r\n      <div class=\"dropdown\">\r\n        <button\r\n          class=\"dropdown-toggle border-0 drop\"\r\n          type=\"button\"\r\n          data-bs-toggle=\"dropdown\"\r\n          title=\"dropbutton\"\r\n          data-bs-offset=\"0,10\"\r\n        ></button>\r\n        <ul class=\"dropdown-menu\">\r\n          <li>\r\n            <a class=\"dropdown-item pointer\" routerLink=\"customer/profile\"\r\n              >Profile</a\r\n            >\r\n          </li>\r\n          <!-- <li>\r\n            <a class=\"dropdown-item pointer\" routerLink=\"customer/favourites\"\r\n              >Favorites</a\r\n            >\r\n          </li> -->\r\n          <li>\r\n            <a class=\"dropdown-item pointer\" (click)=\"logout()\">Logout</a>\r\n          </li>\r\n        </ul>\r\n      </div>\r\n    </div>\r\n\r\n    <div class=\"login flex gap-md-4\" *ngIf=\"!isLoggedIn\">\r\n      <!-- <div class=\"Signup flex gap-2\">\r\n        <mat-icon\r\n          aria-hidden=\"false\"\r\n          aria-label=\"Example home icon\"\r\n          fontIcon=\"person\"\r\n        ></mat-icon>\r\n        <span\r\n          (click)=\"openSignupDialog('3000ms', '1500ms')\"\r\n          class=\"fw-bold pointer\"\r\n          >Register</span\r\n        >\r\n      </div> -->\r\n\r\n      <div class=\"login flex gap-2\">\r\n        <mat-icon\r\n          aria-hidden=\"false\"\r\n          aria-label=\"Example home icon\"\r\n          fontIcon=\"login\"\r\n        ></mat-icon>\r\n        <span\r\n          (click)=\"openLoginDialog('3000ms', '1500ms')\"\r\n          class=\"fw-bold pointer\"\r\n          >Log In</span\r\n        >\r\n      </div>\r\n    </div>\r\n\r\n    <div class=\"cart flex justify-content-center align-items gap-2\" (mouseover)=\"showCart=true\" (mouseleave)=\"showCart=false\" >\r\n\r\n        <div class=\"menupart flex justify-content-center align-items gap-2\" >\r\n            <mat-icon\r\n            aria-hidden=\"false\"\r\n            aria-label=\"Example home icon\" [matBadge]=\"matBadge\" matBadgeColor=\"warn\"\r\n            fontIcon=\"shopping_cart\" \r\n          ></mat-icon>\r\n    \r\n          <span\r\n          class=\"fw-bold pointer\"\r\n          >Cart</span\r\n        >\r\n        </div>\r\n\r\n    <div class=\"mycart bg-white shadow\" *ngIf=\"showCart\" >\r\n       <app-cart></app-cart>\r\n    </div>\r\n   \r\n    </div>\r\n\r\n   \r\n  </div>\r\n</div>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.html b/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.html
+--- a/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.html	(revision 15ecb9d1f0bf206a789a37c92444181723a409f9)
++++ b/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.html	(date 1718278851832)
+@@ -31,11 +31,11 @@
+               >Profile</a
+             >
+           </li>
+-          <!-- <li>
++          <li>
+             <a class="dropdown-item pointer" routerLink="customer/favourites"
+               >Favorites</a
+             >
+-          </li> -->
++          </li>
+           <li>
+             <a class="dropdown-item pointer" (click)="logout()">Logout</a>
+           </li>
+@@ -44,7 +44,7 @@
+     </div>
+ 
+     <div class="login flex gap-md-4" *ngIf="!isLoggedIn">
+-      <!-- <div class="Signup flex gap-2">
++      <div class="Signup flex gap-2">
+         <mat-icon
+           aria-hidden="false"
+           aria-label="Example home icon"
+@@ -55,7 +55,7 @@
+           class="fw-bold pointer"
+           >Register</span
+         >
+-      </div> -->
++      </div>
+ 
+       <div class="login flex gap-2">
+         <mat-icon
+@@ -71,27 +71,17 @@
+       </div>
+     </div>
+ 
+-    <div class="cart flex justify-content-center align-items gap-2" (mouseover)="showCart=true" (mouseleave)="showCart=false" >
+-
+-        <div class="menupart flex justify-content-center align-items gap-2" >
+-            <mat-icon
+-            aria-hidden="false"
+-            aria-label="Example home icon" [matBadge]="matBadge" matBadgeColor="warn"
+-            fontIcon="shopping_cart" 
+-          ></mat-icon>
+-    
+-          <span
+-          class="fw-bold pointer"
+-          >Cart</span
+-        >
+-        </div>
+-
+-    <div class="mycart bg-white shadow" *ngIf="showCart" >
+-       <app-cart></app-cart>
+-    </div>
+-   
++    <div class="cart flex justify-content-center align-items gap-2">
++      <mat-icon
++        aria-hidden="false"
++        aria-label="Example home icon" [matBadge]="matBadge" matBadgeColor="warn"
++        fontIcon="shopping_cart"
++      ></mat-icon>
++
++      <span
++      class="fw-bold pointer"
++      >Cart</span
++    >
+     </div>
+-
+-   
+   </div>
+ </div>
+Index: ../FrontEnd/DishDash/package-lock.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/package-lock.json b/../FrontEnd/DishDash/package-lock.json
+--- a/../FrontEnd/DishDash/package-lock.json	(revision 15ecb9d1f0bf206a789a37c92444181723a409f9)
++++ b/../FrontEnd/DishDash/package-lock.json	(date 1718314913436)
+@@ -22,6 +22,7 @@
+         "ngx-cookie-service": "^18.0.0",
+         "rxjs": "~7.8.0",
+         "tslib": "^2.3.0",
++        "uuid": "^10.0.0",
+         "zone.js": "~0.14.3"
+       },
+       "devDependencies": {
+@@ -11973,6 +11974,15 @@
+         "websocket-driver": "^0.7.4"
+       }
+     },
++    "node_modules/sockjs/node_modules/uuid": {
++      "version": "8.3.2",
++      "resolved": "https://registry.npmjs.org/uuid/-/uuid-8.3.2.tgz",
++      "integrity": "sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==",
++      "dev": true,
++      "bin": {
++        "uuid": "dist/bin/uuid"
++      }
++    },
+     "node_modules/socks": {
+       "version": "2.8.3",
+       "resolved": "https://registry.npmjs.org/socks/-/socks-2.8.3.tgz",
+@@ -12812,10 +12822,13 @@
+       }
+     },
+     "node_modules/uuid": {
+-      "version": "8.3.2",
+-      "resolved": "https://registry.npmjs.org/uuid/-/uuid-8.3.2.tgz",
+-      "integrity": "sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==",
+-      "dev": true,
++      "version": "10.0.0",
++      "resolved": "https://registry.npmjs.org/uuid/-/uuid-10.0.0.tgz",
++      "integrity": "sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==",
++      "funding": [
++        "https://github.com/sponsors/broofa",
++        "https://github.com/sponsors/ctavan"
++      ],
+       "bin": {
+         "uuid": "dist/bin/uuid"
+       }
+Index: ../FrontEnd/DishDash/src/app/services/user.service.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';\r\nimport { Injectable } from '@angular/core';\r\nimport { customerLogin } from '../Model/customerLogin';\r\nimport { BehaviorSubject, Observable, Subject } from 'rxjs';\r\nimport { customer } from '../Model/customer';\r\nimport { restaurant } from '../Model/restaurant';\r\nimport { CookieService } from 'ngx-cookie-service';\r\n\r\n@Injectable({\r\n  providedIn: 'root'\r\n})\r\nexport class UserService {\r\n\r\n  loginAPIkey:string = ``;\r\n  logInSubject = new Subject<boolean>()\r\n  listenLogin = new Subject<customerLogin>();\r\n  tokenSubject = new BehaviorSubject<boolean>(this.hasToken());\r\n\r\n  constructor(private http:HttpClient, private cookieservice:CookieService) {\r\n    window.addEventListener('storage', () => {\r\n      console.log('Token state changed');\r\n      this.tokenSubject.next(this.hasToken())\r\n    })\r\n   }\r\n\r\n  hasToken():boolean {\r\n    return this.cookieservice.check(\"token\")\r\n  }\r\n\r\n  loginUser(data:customerLogin):Observable<string> {\r\n    return this.http.post(\"http://localhost:8081/api/v1/login\", data,  { responseType: 'text' });\r\n  }\r\n\r\n  //SendToNav\r\n\r\n  sendToNav(data:customerLogin) {\r\n    this.listenLogin.next(data);\r\n\r\n  }\r\n\r\n  registerUser(customer:customer):Observable<customer>\r\n  {\r\n    return this.http.post<customer>(\"http://localhost:8083/api/v2/register\",customer);\r\n  }\r\n\r\n  fetchCustomerByJwt(Jwt:any):Observable<customer> {\r\n\r\n    const headers = new HttpHeaders({\r\n      'Authorization': `Bearer ${Jwt}`\r\n    });\r\n\r\n    return this.http.get<customer>('http://localhost:8083/api/v2/customers/eachcustomer',{ headers });\r\n  }\r\n\r\n  fetchCustomerFavRestaurants(customerId:string):Observable<string> {\r\n    return this.http.get<string>(\"url\")\r\n  }\r\n\r\n  login(isLoggedIn:boolean) {\r\n    this.logInSubject.next(isLoggedIn);\r\n  }\r\n\r\n  //Fetching all favs by JWT\r\n  fetchCustomerFavByJwt(Jwt:any):Observable<Array<string>> {\r\n\r\n    const headers = new HttpHeaders({\r\n      'Authorization': `Bearer ${Jwt}`\r\n    });\r\n\r\n    return this.http.get<Array<string>>('http://localhost:8083/api/v2/customers/restaurant',{ headers });\r\n  }\r\n\r\n\r\n\r\n\r\n  //Sending Customer Fav To Backend\r\n\r\n  sendFavoriteRestToCustomer(resId:string, Jwt:string): Observable<string>{\r\n\r\n    const headers = new HttpHeaders({\r\n      'Authorization': `Bearer ${Jwt}`\r\n    });\r\n    return this.http.put(\"http://localhost:8083/api/v2/customers/addfavres\", resId, { headers, responseType:'text'})\r\n  }\r\n\r\n  //Deleting Custoemer Fav from Backedn\r\n  DeleteFavoriteRestFromCustomer(resId:string, Jwt:string):Observable<boolean> {\r\n\r\n    const headers = new HttpHeaders({\r\n      'Authorization': `Bearer ${Jwt}`\r\n    });\r\n\r\n    const params = new HttpParams().set('resId', resId);\r\n\r\n    const options ={\r\n      headers:headers,\r\n      params: params\r\n    }\r\n\r\n return this.http.delete<boolean>(\"http://localhost:8082/api/v2/customers/deleterestaurant\", options)\r\n\r\n  }\r\n  \r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/services/user.service.ts b/../FrontEnd/DishDash/src/app/services/user.service.ts
+--- a/../FrontEnd/DishDash/src/app/services/user.service.ts	(revision 15ecb9d1f0bf206a789a37c92444181723a409f9)
++++ b/../FrontEnd/DishDash/src/app/services/user.service.ts	(date 1718310554918)
+@@ -4,7 +4,6 @@
+ import { BehaviorSubject, Observable, Subject } from 'rxjs';
+ import { customer } from '../Model/customer';
+ import { restaurant } from '../Model/restaurant';
+-import { CookieService } from 'ngx-cookie-service';
+ 
+ @Injectable({
+   providedIn: 'root'
+@@ -12,35 +11,19 @@
+ export class UserService {
+ 
+   loginAPIkey:string = ``;
++
+   logInSubject = new Subject<boolean>()
+-  listenLogin = new Subject<customerLogin>();
+-  tokenSubject = new BehaviorSubject<boolean>(this.hasToken());
+ 
+-  constructor(private http:HttpClient, private cookieservice:CookieService) {
+-    window.addEventListener('storage', () => {
+-      console.log('Token state changed');
+-      this.tokenSubject.next(this.hasToken())
+-    })
+-   }
+ 
+-  hasToken():boolean {
+-    return this.cookieservice.check("token")
+-  }
++  constructor(private http:HttpClient) { }
+ 
+   loginUser(data:customerLogin):Observable<string> {
+     return this.http.post("http://localhost:8081/api/v1/login", data,  { responseType: 'text' });
+   }
+ 
+-  //SendToNav
+-
+-  sendToNav(data:customerLogin) {
+-    this.listenLogin.next(data);
+-
+-  }
+-
+-  registerUser(customer:customer):Observable<customer>
++  registerUser(customer:any):Observable<any>
+   {
+-    return this.http.post<customer>("http://localhost:8083/api/v2/register",customer);
++    return this.http.post<any>("http://localhost:8083/api/v2/register",customer);
+   }
+ 
+   fetchCustomerByJwt(Jwt:any):Observable<customer> {
+Index: ../FrontEnd/DishDash/src/app/Components/edit-profile/edit-profile.component.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>\r\n\r\n<h2>Profile Edit WORKS</h2>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/edit-profile/edit-profile.component.html b/../FrontEnd/DishDash/src/app/Components/edit-profile/edit-profile.component.html
+--- a/../FrontEnd/DishDash/src/app/Components/edit-profile/edit-profile.component.html	(revision 15ecb9d1f0bf206a789a37c92444181723a409f9)
++++ b/../FrontEnd/DishDash/src/app/Components/edit-profile/edit-profile.component.html	(date 1718307370426)
+@@ -1,3 +1,1 @@
+-
+-
+-<h2>Profile Edit WORKS</h2>
++<h3>Update Your Profile</h3>
+Index: ../FrontEnd/DishDash/src/app/app.module.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import { NgModule } from '@angular/core';\r\nimport { BrowserModule } from '@angular/platform-browser';\r\n\r\nimport { AppRoutingModule } from './app-routing.module';\r\nimport { AppComponent } from './app.component';\r\nimport { NavigationComponent } from './Components/navigation/navigation.component';\r\nimport { NavbarComponent } from './Components/navbar/navbar.component';\r\nimport { SearchComponent } from './Components/search/search.component';\r\nimport { CategoryComponent } from './Components/category/category.component';\r\nimport { CategorycardComponent } from './Components/categorycard/categorycard.component';\r\nimport { RestaurantComponent } from './Components/restaurant/restaurant.component';\r\nimport { RestaurantviewComponent } from './Components/restaurantview/restaurantview.component';\r\nimport { FooterComponent } from './Components/footer/footer.component';\r\nimport { LoginComponent } from './Components/login/login.component';\r\nimport { RegisterComponent } from './Components/register/register.component';\r\nimport { PagenotfoundComponent } from './Components/pagenotfound/pagenotfound.component';\r\nimport { HttpClientModule } from '@angular/common/http';\r\nimport { FormsModule, ReactiveFormsModule } from '@angular/forms';\r\nimport { provideAnimationsAsync } from '@angular/platform-browser/animations/async';\r\nimport {MatIconModule} from '@angular/material/icon';\r\nimport { RestaurantcardComponent } from './Components/restaurantcard/restaurantcard.component';\r\nimport { HomepageComponent } from './Components/homepage/homepage.component';\r\nimport { CutomerfavouriteComponent } from './Components/cutomerfavourite/cutomerfavourite.component';\r\nimport {MatProgressBarModule} from '@angular/material/progress-bar';\r\nimport { LoadingbarComponent } from './Components/loadingbar/loadingbar.component';\r\n\r\nimport {CookieService} from 'ngx-cookie-service';\r\nimport {MatDialogModule} from '@angular/material/dialog';\r\nimport { MatError, MatFormField, MatInput, MatLabel } from '@angular/material/input';\r\nimport { SpinnerComponent } from './Components/spinner/spinner.component';\r\nimport {MatProgressSpinner, MatProgressSpinnerModule} from '@angular/material/progress-spinner';\r\nimport { ProfileComponent } from './Components/profile/profile.component';\r\nimport { LoginalertComponent } from './Components/loginalert/loginalert.component';\r\nimport {MatBadgeModule} from '@angular/material/badge';\r\nimport { CartComponent } from './Components/cart/cart.component';\r\n\r\n\r\n@NgModule({\r\n  declarations: [\r\n    AppComponent,\r\n    NavigationComponent,\r\n    NavbarComponent,\r\n    SearchComponent,\r\n    CategoryComponent,\r\n    CategorycardComponent,\r\n    RestaurantComponent,\r\n    RestaurantviewComponent,\r\n    FooterComponent,\r\n    LoginComponent,\r\n    RegisterComponent,\r\n    PagenotfoundComponent,\r\n    RestaurantcardComponent,\r\n    HomepageComponent,\r\n    CutomerfavouriteComponent,\r\n    LoadingbarComponent,\r\n    SpinnerComponent,\r\n    ProfileComponent,\r\n    LoginalertComponent,\r\n    CartComponent\r\n  ],\r\n  imports: [\r\n    BrowserModule,\r\n    AppRoutingModule,\r\n    FormsModule,\r\n    MatIconModule,\r\n    MatProgressBarModule,\r\n    MatDialogModule,\r\n    ReactiveFormsModule,\r\n    MatInput,\r\n    MatFormField,\r\n    MatError,\r\n    MatLabel,\r\n    MatProgressSpinnerModule,\r\n    MatProgressSpinner,\r\n    MatBadgeModule,\r\n    HttpClientModule\r\n  ],\r\n  providers: [ provideAnimationsAsync(), CookieService],\r\n  bootstrap: [AppComponent]\r\n})\r\nexport class AppModule { }\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/app.module.ts b/../FrontEnd/DishDash/src/app/app.module.ts
+--- a/../FrontEnd/DishDash/src/app/app.module.ts	(revision 15ecb9d1f0bf206a789a37c92444181723a409f9)
++++ b/../FrontEnd/DishDash/src/app/app.module.ts	(date 1718294173237)
+@@ -33,6 +33,10 @@
+ import { LoginalertComponent } from './Components/loginalert/loginalert.component';
+ import {MatBadgeModule} from '@angular/material/badge';
+ import { CartComponent } from './Components/cart/cart.component';
++import { OrderhistoryComponent } from './Components/orderhistory/orderhistory.component';
++import { MyaddressesComponent } from './Components/myaddresses/myaddresses.component';
++import {MatExpansionModule} from '@angular/material/expansion';
++import {MatButtonModule} from '@angular/material/button';
+ 
+ 
+ @NgModule({
+@@ -56,7 +60,9 @@
+     SpinnerComponent,
+     ProfileComponent,
+     LoginalertComponent,
+-    CartComponent
++    CartComponent,
++    OrderhistoryComponent,
++    MyaddressesComponent
+   ],
+   imports: [
+     BrowserModule,
+@@ -73,6 +79,8 @@
+     MatProgressSpinnerModule,
+     MatProgressSpinner,
+     MatBadgeModule,
++    MatExpansionModule,
++    MatButtonModule,
+     HttpClientModule
+   ],
+   providers: [ provideAnimationsAsync(), CookieService],
+Index: ../FrontEnd/DishDash/src/app/Components/profile/profile.component.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><div class=\"welcome p-3 bg-black\">\r\n    <img class=\"profile rounded-circle\" src=\"https://via.placeholder.com/100x100\" alt=\"\">\r\n <h2 class=\"mt-1 text-white\">Welcome, <span class=\"fst-italic fw-bold text-danger\">{{activeCustomer.customerName}}</span></h2> \r\n</div>\r\n\r\n<div class=\"profilediv flex \">\r\n\r\n    <div class=\"left w-30 p-3  pt-4 pb-4 bg-body-secondary\">\r\n        <div class=\"profileInfo\">\r\n            <h6 >PROFILE</h6>\r\n            <div class=\"item fs-3 flex flex-column gap-3\">\r\n                <div class=\"favorites bg-white p-2 pointer\" routerLink=\"favorites\">Favorites</div>\r\n                <div class=\"editProfile bg-white p-2 pointer\" routerLink=\"edit-profile\">Edit Profile</div>\r\n            </div>\r\n        </div>\r\n\r\n        <div class=\"orderOnline mt-5\">\r\n            <h6>ONLINE ORDEREING</h6>\r\n            <div class=\"item   fs-3 flex flex-column gap-3\">\r\n                <div class=\"editProfile bg-white p-2 pointer\">Order History</div>\r\n                <div class=\"favorites bg-white p-2 pointer\">My History</div>\r\n            </div>\r\n        </div>\r\n\r\n        <div class=\"orderOnline mt-5\">\r\n            <h6>ACCOUNT SETTINGS</h6>\r\n            <div class=\"item   fs-3 flex flex-column gap-3\">\r\n                <div class=\"editProfile bg-white p-2 pointer\" (click)=\"logout()\">Logout</div>\r\n            </div>\r\n        </div>\r\n        \r\n    </div>\r\n\r\n    <div class=\"right w-50\">\r\n       <router-outlet></router-outlet>\r\n\r\n    </div>\r\n</div>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/profile/profile.component.html b/../FrontEnd/DishDash/src/app/Components/profile/profile.component.html
+--- a/../FrontEnd/DishDash/src/app/Components/profile/profile.component.html	(revision 15ecb9d1f0bf206a789a37c92444181723a409f9)
++++ b/../FrontEnd/DishDash/src/app/Components/profile/profile.component.html	(date 1718305524562)
+@@ -1,5 +1,6 @@
+ <div class="welcome p-3 bg-black">
+-    <img class="profile rounded-circle" src="https://via.placeholder.com/100x100" alt="">
++    <img *ngIf="activeCustomer.customerProfilePic && activeCustomer.customerProfilePic !=''" class="profile rounded-circle" src="https://via.placeholder.com/100x100" alt="">
++    <img *ngIf="!activeCustomer.customerProfilePic || activeCustomer.customerProfilePic ==''" class="profile rounded-circle" src="https://via.placeholder.com/100x100" alt="">
+  <h2 class="mt-1 text-white">Welcome, <span class="fst-italic fw-bold text-danger">{{activeCustomer.customerName}}</span></h2> 
+ </div>
+ 
+@@ -17,8 +18,8 @@
+         <div class="orderOnline mt-5">
+             <h6>ONLINE ORDEREING</h6>
+             <div class="item   fs-3 flex flex-column gap-3">
+-                <div class="editProfile bg-white p-2 pointer">Order History</div>
+-                <div class="favorites bg-white p-2 pointer">My History</div>
++                <div class="editProfile bg-white p-2 pointer" routerLink="order-history">Order History</div>
++                <div class="favorites bg-white p-2 pointer" routerLink="my-addresses">My Addresses</div>
+             </div>
+         </div>
+ 
+@@ -31,7 +32,7 @@
+         
+     </div>
+ 
+-    <div class="right w-50">
++    <div class="right w-100">
+        <router-outlet></router-outlet>
+ 
+     </div>
+Index: ../FrontEnd/DishDash/src/app/Components/profile/profile.component.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import { Component, OnInit } from '@angular/core';\r\nimport { CookieService } from 'ngx-cookie-service';\r\nimport { UserService } from '../../services/user.service';\r\nimport { customer } from '../../Model/customer';\r\nimport { RouterService } from '../../services/router.service';\r\n\r\n@Component({\r\n  selector: 'app-profile',\r\n  templateUrl: './profile.component.html',\r\n  styleUrl: './profile.component.css'\r\n})\r\nexport class ProfileComponent implements OnInit {\r\n  customerJwt:string;\r\n  constructor(private cookieservice:CookieService, private userService:UserService, private routerservice:RouterService) {}\r\n  activeCustomer:customer ={\r\n    customerName: '',\r\n    customerEmail: '',\r\n    customerPassword: '',\r\n    customerPhone: 0\r\n  }\r\n\r\n  ngOnInit():void {\r\n    \r\n    this.routerservice.navigateToFavOption();\r\n    this.customerJwt = this.cookieservice.get(\"token\")\r\n\r\n    this.userService.fetchCustomerByJwt(this.customerJwt).subscribe({\r\n      next:data => {\r\n        this.activeCustomer = data;\r\n      },\r\n      error:data => {\r\n        console.log(\"Error while Fetchin Customer\")\r\n      }\r\n    })\r\n\r\n  }\r\n\r\n  logout() {\r\n    this.cookieservice.delete(\"token\");\r\n    this.routerservice.navigateToHomePage();\r\n  }\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/profile/profile.component.ts b/../FrontEnd/DishDash/src/app/Components/profile/profile.component.ts
+--- a/../FrontEnd/DishDash/src/app/Components/profile/profile.component.ts	(revision 15ecb9d1f0bf206a789a37c92444181723a409f9)
++++ b/../FrontEnd/DishDash/src/app/Components/profile/profile.component.ts	(date 1718306623398)
+@@ -16,12 +16,11 @@
+     customerName: '',
+     customerEmail: '',
+     customerPassword: '',
+-    customerPhone: 0
+   }
+ 
+   ngOnInit():void {
+     
+-    this.routerservice.navigateToFavOption();
++    // this.routerservice.navigateToFavOption();
+     this.customerJwt = this.cookieservice.get("token")
+ 
+     this.userService.fetchCustomerByJwt(this.customerJwt).subscribe({
+@@ -40,4 +39,8 @@
+     this.routerservice.navigateToHomePage();
+   }
+ 
++  profilePictureUpdate() {
++    
++  }
++
+ }

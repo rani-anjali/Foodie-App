@@ -1,0 +1,23 @@
+<div class="container mt-5" *ngIf="restaurants.length != 0">
+    <div class="headline text-center mb-4">
+      <h3>Your Favourites</h3>
+    </div>
+  
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-4 mb-4" *ngFor="let restaurant of restaurants">
+        <div class="card h-100 shadow-sm">
+          <app-restaurantcard [onerestaurant]="restaurant"></app-restaurantcard>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="text-center p-5" *ngIf="nofavRestPresent">
+    <h3 class="text-info-emphasis">No Favorite Restaurant</h3>
+    <a routerLink="/" class="btn btn-primary mt-3">Go to Home Page</a>
+  </div>
+  
+  <div class="spinner-container d-flex justify-content-center align-items-center" *ngIf="spinnerVisible">
+    <mat-spinner></mat-spinner>
+  </div>
+  

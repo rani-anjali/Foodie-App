@@ -1,0 +1,90 @@
+.checkout-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+  }
+  
+  h2 {
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    font-weight: bold;
+  }
+  
+  .form-group .form-control {
+    border-radius: 5px;
+  }
+  
+  .primary-address {
+    background-color: #f8f9fa;
+  }
+  
+  .selected-address-badge {
+    font-weight: bold;
+  }
+  
+  .no-address {
+    background-color: #f8f9fa;
+  }
+  
+  .cart-summary {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .cart-summary h4 {
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .list-group-item {
+    border: none;
+    padding: 15px 0;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .list-group-item:last-child {
+    border-bottom: none;
+  }
+  
+  .text-muted {
+    color: #6c757d;
+  }
+  
+  h5 {
+    font-weight: bold;
+    margin-top: 20px;
+  }
+  
+  .button {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .btn-primary {
+   
+    background-color:  #F4835F;
+    border-color:  #F4835F;
+    color: #fff;
+    border-radius: 5px;
+  }
+  
+  .btn-primary:hover {
+    
+    background-color: #fb9374;
+    border-color: #F4835F;
+  }
+  
+  .img-thumbnail {
+    border-radius: 5px;
+  }
+  
+  @media (max-width: 768px) {
+    .checkout-container {
+      padding: 10px;
+    }
+  }
+  

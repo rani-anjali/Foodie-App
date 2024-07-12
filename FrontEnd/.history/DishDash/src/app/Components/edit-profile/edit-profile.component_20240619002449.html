@@ -1,0 +1,52 @@
+<div class="editprofile container mt-5">
+  <div class="header">
+    <h2 class="fw-bold mb-4">Update Your Profile</h2>
+  </div>
+  
+  <form [formGroup]="updateForm" (ngSubmit)="onSubmit()">
+    <div class="form-field-container">
+      <!-- Customer Name -->
+      <mat-form-field appearance="outline">
+        <mat-label>Your Name</mat-label>
+        <input matInput type="text" placeholder="Your Name" formControlName="customerName">
+        <mat-error *ngIf="updateForm.get('customerName')?.hasError('required')">
+          Name is required
+        </mat-error>
+        <mat-error *ngIf="updateForm.get('customerName')?.hasError('minlength')">
+          Name must have more than 2 characters.
+        </mat-error>
+        <mat-error *ngIf="updateForm.get('customerName')?.hasError('pattern')">
+          Only alphabets are allowed
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Customer Email -->
+      <mat-form-field appearance="outline">
+        <mat-label>Your Email</mat-label>
+        <input matInput type="email" placeholder="email" formControlName="customerEmail" matTooltip="You can't edit this email">
+      </mat-form-field>
+
+      <!-- Customer Phone -->
+      <mat-form-field appearance="outline">
+        <mat-label>Your Phone Number</mat-label>
+        <input matInput type="text" placeholder="Your Phone" formControlName="customerPhone" ngModel="">
+        <mat-error *ngIf="updateForm.get('customerPhone')?.hasError('required')">
+          Phone is required
+        </mat-error>
+        <mat-error *ngIf="updateForm.get('customerPhone').hasError('pattern')">
+          Number must contain 10 digits.
+        </mat-error>
+      </mat-form-field>
+
+      <button class="full-width btn btn-primary mb-4" type="submit" [disabled]="updateForm.invalid">Update Profile Info</button>
+    </div>
+  </form>
+
+  <div class="spinner" *ngIf="spinnerVisible">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <div class="update-message alert alert-success" *ngIf="updateMessageVisible" role="alert">
+    Profile updated successfully!
+  </div>
+</div>

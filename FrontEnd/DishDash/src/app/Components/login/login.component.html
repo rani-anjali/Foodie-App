@@ -1,0 +1,65 @@
+<div class="header flex justify-content-end align-items-center">
+  <button mat-icon-button class="close-button" (click)="closeDialoge()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<div class="loginform p-5">
+  <form #loginform="ngForm" ngNativeValidate (ngSubmit)="loginUser(userlogin)">
+
+    <div *ngIf="errorMessage" class="alert alert-danger">{{errorMessage}}</div>
+
+    <!-- Email input -->
+    <div class="form-outline mb-4">
+      <input
+        type="email"
+        id="email"
+        class="form-control"
+        name="customerEmail"
+        [(ngModel)]="userlogin.customerEmail"
+        #customerEmail="ngModel"
+        required
+        placeholder="Email address"
+      />
+    </div>
+
+    <!-- Password input -->
+    <div class="form-outline mb-4">
+      <input
+        type="password"
+        id="password"
+        class="form-control"
+        name="customerPassword"
+        [(ngModel)]="userlogin.customerPassword"
+        #customerPassword="ngModel"
+        required
+        placeholder="Password"
+      />
+    </div>
+
+    <!-- Submit button -->
+    <div class="button">
+      <button
+        type="submit"
+        class="btn btn-primary button btn-block mb-4"
+        [disabled]="loginform.invalid"
+      >
+        Sign in
+      </button>
+    </div>
+
+    <!-- Spinner -->
+    <div class="spinner flex justify-content-center" *ngIf="isLoadingSpinner">
+      <mat-spinner class="loadingSpinner"></mat-spinner>
+    </div>
+    
+    <!-- Register link -->
+    <div class="text-center">
+      <p>Not a member? <a class="pointer" (click)="openRegister()">Register</a></p>
+    </div>
+  </form>
+
+  <div class="login-message alert alert-success" *ngIf="loggedInSuccess" role="alert">
+    Logged in successfully!
+  </div>
+</div>

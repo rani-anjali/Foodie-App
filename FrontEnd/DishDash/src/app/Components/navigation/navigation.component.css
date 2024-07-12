@@ -1,0 +1,120 @@
+/* Navbar Styles */
+.navbar {
+  z-index: 1000; /* Ensure the navbar is above other content */
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading Bar Styles */
+.loading-bar {
+  position: relative;
+  z-index: 999; /* Ensure the loading bar is below the navbar */
+  width: 100%;
+  height: 5px;
+  background-color: yellow;
+  display: none; /* Initially hidden */
+}
+
+/* Main Content Styles */
+.main-content {
+  padding-top: 70px; 
+  padding-bottom: 20px; /* Optional: Add some bottom padding */
+}
+
+/* Footer Styles */
+footer {
+  padding: 20px;
+  text-align: center;
+  background-color: #f8f9fa;
+}
+
+/* Media Query for Responsive Design */
+@media (max-width: 768px) {
+  .navbar-brand .logo {
+      height: 40px;
+  }
+  .nav-item .cart-dropdown {
+      width: 100%;
+  }
+}
+
+.chatbot {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1100; /* Ensure the chatbot is above other content */
+}
+
+.chatbubble {
+  width: 60px; /* Set equal width and height */
+  height: 60px; /* Set equal width and height */
+  border-radius: 50%;
+  background-color: #F4835F;
+   /* Primary color for the bubble */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chatbubble:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.chatbubble mat-icon {
+  font-size: 24px; /* Adjust the size of the chat icon */
+}
+
+.chatbubble-message {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: #3B273F;
+  /* background-color: #FFBB4A; */
+  color: white;
+  border-radius: 20px;
+  font-size: 14px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  animation: fadeInUp 0.3s ease-in-out;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.support-dropup {
+  right: 20px; /* Adjust position to stay aligned with the chat bubble */
+  bottom: 80px; /* Adjust position to float above the chat bubble */
+  width: 400px;
+  /* height: 400px; */
+  border-radius: 5px;
+  /* background-color: white; */
+  padding: 10px;
+  z-index: 1000;
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+  transition: all 0.3s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .support-dropup {
+    width: 90%;
+    right: 5%;
+  }
+}

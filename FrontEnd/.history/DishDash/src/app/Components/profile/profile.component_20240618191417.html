@@ -1,0 +1,55 @@
+<div class="profile-container container mt-5">
+    <!-- Profile Header Section -->
+  <form [formGroup]="pictureForm" (ngSubmit)="onSubmit()">
+    <div id="profile-div" class="welcome text-center p-4 bg-dark text-white position-relative rounded">
+      <img id="profileImage" *ngIf="profilePicture" class="profile rounded-circle" src="{{url}}"  alt="Profile Image">
+      <img id="profileImage" *ngIf="!profilePicture" class="profile rounded-circle" src="https://via.placeholder.com/50x50"  alt="Profile Image">
+      <input type="file" id="fileInput"
+      class="form-control"
+      formControlName="customerProfilePic" (change)="onFileSelected($event)" required style="display:none;">
+      <i class="fas fa-camera camera-icon position-absolute" (click)="triggerFileInput()"></i>
+      <h2 class="mt-3">Welcome, <span class="fst-italic fw-bold text-warning">{{activeCustomer.customerName}}</span></h2>
+      <button mat-button type="submit" [disabled="">upload</button>
+    </div>
+  </form>
+  
+    <!-- Profile Navigation Section -->
+    <div class="profile-nav mt-5">
+      <div class="row">
+        <div class="col-md-4 col-lg-3">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Profile</h5>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item pointer" routerLink="favorites">Favorites</li>
+                <li class="list-group-item pointer" routerLink="edit-profile">Edit Profile</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card shadow-sm mt-4">
+            <div class="card-body">
+              <h5 class="card-title">Online Ordering</h5>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item pointer" routerLink="order-history">Order History</li>
+                <li class="list-group-item pointer" routerLink="my-addresses">My Addresses</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card shadow-sm mt-4">
+            <div class="card-body">
+              <h5 class="card-title">Account Settings</h5>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item pointer" (click)="logout()">Logout</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-8 col-lg-9">
+          <div class="content-area">
+            <router-outlet></router-outlet>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  

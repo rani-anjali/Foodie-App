@@ -1,0 +1,80 @@
+<div class="address-management-container p-5">
+  <div class="add-address-section w-100 mb-5">
+    <mat-accordion class="address-accordion" multi>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>add_location_alt</mat-icon>
+            Add Your Address
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <form [formGroup]="addressForm" (ngSubmit)="onSubmit()">
+          <div class="form-row">
+            <mat-form-field class="w-100">
+              <mat-label>House No/Flat No/Area Name</mat-label>
+              <input matInput placeholder="House No/Flat No/Area Name" formControlName="address1">
+              <mat-error *ngIf="address1?.hasError('required')">Address Line 1 is required.</mat-error>
+              <mat-error *ngIf="address1?.hasError('minlength')">Address Line should contain atleas</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="w-100">
+              <mat-label>Landmark</mat-label>
+              <input matInput placeholder="Landmark" formControlName="landMark">
+              <mat-error *ngIf="landmark?.hasError('required')">Landmark is required.</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field class="w-100">
+              <mat-label>City</mat-label>
+              <input matInput placeholder="City" formControlName="city">
+              <mat-error *ngIf="city?.hasError('required')">City is required.</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="w-100">
+              <mat-label>Pin Code</mat-label>
+              <input matInput placeholder="Pincode" formControlName="pincode">
+              <mat-error *ngIf="pincode?.hasError('required')">Pin Code is required.</mat-error>
+              <mat-error *ngIf="pincode?.hasError('pattern')">Pin Code must be 6 digits.</mat-error>
+            </mat-form-field>
+          </div>
+
+          <button class="btn btn-dark btn-block mb-3" type="submit" [disabled]="addressForm.invalid">Save Address</button>
+        </form>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+
+  <div class="saved-addresses-section bg-light p-4 rounded">
+    <div *ngIf="spinnerVisible" class="spinner flex justify-content-center">
+      <mat-spinner></mat-spinner>
+    </div>
+
+    <div *ngIf="!spinnerVisible && noAddresses" class="no-address flex justify-content-center">
+      <h3>No Saved Addresses...</h3>
+    </div>
+
+    <div *ngIf="!spinnerVisible && !noAddresses">
+      <h4 class="mb-4">Your Saved Addresses</h4>
+      <div class="address-cards">
+        <div *ngFor="let address of allAddress; let isFirst = first" class="address-card card shadow-sm mb-3">
+          <div class="card-body">
+            <h5 class="card-title">{{ address.address1 }}</h5>
+            <p class="card-text"><strong>City:</strong> {{ address.city }}</p>
+            <p class="card-text"><strong>Landmark:</strong> {{ address.landMark }}</p>
+            <p class="card-text"><strong>Pin Code:</strong> {{ address.pincode }}</p>
+        
+            <div class="d-flex justify-content-between align-items-center mt-3">
+              <button *ngIf="!isFirst" mat-raised-button color="primary" class="btn btn-sm" (click)="primaryAddress(address)">Make Primary</button>
+              <button mat-raised-button color="warn" class="btn btn-sm" (click)="deleteAddress(address.addressId)">Delete</button>
+            </div>
+            <div *ngIf="isFirst" class="primary-banner bg-primary text-white text-center p-2 mt-2">
+              Primary Address
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

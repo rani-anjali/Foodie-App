@@ -1,0 +1,1249 @@
+Index: customersapiservice/src/main/java/com/bej/customersapiservice/CustomersapiserviceApplication.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.bej.customersapiservice;\r\n\r\nimport com.bej.customersapiservice.filter.JwtFilter;\r\nimport org.springframework.boot.SpringApplication;\r\nimport org.springframework.boot.autoconfigure.SpringBootApplication;\r\nimport org.springframework.boot.web.servlet.FilterRegistrationBean;\r\nimport org.springframework.cloud.openfeign.EnableFeignClients;\r\nimport org.springframework.context.annotation.Bean;\r\n\r\n@SpringBootApplication\r\n@EnableFeignClients\r\npublic class CustomersapiserviceApplication {\r\n\r\n\tpublic static void main(String[] args) {\r\n\t\tSpringApplication.run(CustomersapiserviceApplication.class, args);\r\n\t}\r\n\t@Bean\r\n\tpublic FilterRegistrationBean jwtFilterBean(){\r\n\t\tFilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();\r\n\t\tfilterRegistrationBean.setFilter(new JwtFilter());\r\n\t\tfilterRegistrationBean.addUrlPatterns(\"/api/v2/customers/*\");\r\n\t\treturn filterRegistrationBean;\r\n\t}\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/customersapiservice/src/main/java/com/bej/customersapiservice/CustomersapiserviceApplication.java b/customersapiservice/src/main/java/com/bej/customersapiservice/CustomersapiserviceApplication.java
+--- a/customersapiservice/src/main/java/com/bej/customersapiservice/CustomersapiserviceApplication.java	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/customersapiservice/src/main/java/com/bej/customersapiservice/CustomersapiserviceApplication.java	(date 1718132815040)
+@@ -6,9 +6,11 @@
+ import org.springframework.boot.web.servlet.FilterRegistrationBean;
+ import org.springframework.cloud.openfeign.EnableFeignClients;
+ import org.springframework.context.annotation.Bean;
++import org.springframework.web.bind.annotation.CrossOrigin;
+ 
+ @SpringBootApplication
+ @EnableFeignClients
++@CrossOrigin
+ public class CustomersapiserviceApplication {
+ 
+ 	public static void main(String[] args) {
+Index: customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.bej.customersapiservice.services;\r\n\r\nimport com.bej.customersapiservice.domain.Customer;\r\nimport com.bej.customersapiservice.exception.CustomerAlreadyExistException;\r\nimport com.bej.customersapiservice.exception.CustomerNotFoundException;\r\n\r\nimport java.util.List;\r\n\r\npublic interface ICustomerService {\r\n\r\n    public Customer registerCustomer(Customer customer) throws CustomerAlreadyExistException;\r\n    public Customer updateCustomer(Customer customer, String customerId) throws CustomerAlreadyExistException, CustomerNotFoundException;\r\n    public String addFavoriteRestaurant(String resId,String customerId) throws CustomerNotFoundException;\r\n    public String addFavoriteDish(Object obj,String customerId) throws CustomerNotFoundException;\r\n    public List<String> getAllFavRestaurant(String customerId);\r\n    public List<Object> getAllFavDishes(String customerId);\r\n    public Customer getCustomerById(String customerId) throws CustomerNotFoundException;\r\n    public boolean deleteFavRestaurant(String customerId,Object restName) throws CustomerNotFoundException;\r\n    public boolean deleteFavDish(String customerId,Object dish) throws CustomerNotFoundException;\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java b/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java
+--- a/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java	(date 1718139653544)
+@@ -15,6 +15,8 @@
+     public List<String> getAllFavRestaurant(String customerId);
+     public List<Object> getAllFavDishes(String customerId);
+     public Customer getCustomerById(String customerId) throws CustomerNotFoundException;
+-    public boolean deleteFavRestaurant(String customerId,Object restName) throws CustomerNotFoundException;
++    public boolean deleteFavRestaurant(String customerId,String restName) throws CustomerNotFoundException;
+     public boolean deleteFavDish(String customerId,Object dish) throws CustomerNotFoundException;
++
++    public Customer testRegister(Customer customer);
+ }
+Index: customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.bej.customersapiservice.services;\r\n\r\nimport com.bej.customersapiservice.domain.Customer;\r\nimport com.bej.customersapiservice.exception.CustomerAlreadyExistException;\r\nimport com.bej.customersapiservice.exception.CustomerNotFoundException;\r\nimport com.bej.customersapiservice.proxy.CustomerProxy;\r\nimport com.bej.customersapiservice.respository.CustomerRepo;\r\nimport org.springframework.beans.factory.annotation.Autowired;\r\nimport org.springframework.http.ResponseEntity;\r\nimport org.springframework.stereotype.Service;\r\n\r\nimport java.util.ArrayList;\r\nimport java.util.List;\r\nimport java.util.Optional;\r\n\r\n@Service\r\npublic class ImplCustomerService implements ICustomerService {\r\n\r\n    @Autowired\r\n    private CustomerRepo customerRepo;\r\n    @Autowired\r\n    private CustomerProxy customerProxy;\r\n    @Override\r\n    public Customer registerCustomer(Customer customer) throws CustomerAlreadyExistException {\r\n        if(customerRepo.findById(customer.getCustomerId()).isPresent()) {\r\n            throw new CustomerAlreadyExistException();\r\n        }\r\n        if(customer.getCustomerFavDishes() ==  null) {\r\n            customer.setCustomerFavDishes(new ArrayList<>());\r\n        }\r\n        if(customer.getCustomerFavRestaurants() == null) {\r\n            customer.setCustomerFavRestaurants(new ArrayList<>());\r\n        }\r\n//\r\n//        customerProxy.registerCustomer(customer);\r\n//        return customerRepo.save(customer);\r\n        Customer customer1=customerRepo.save(customer);\r\n        if(!(customer1.getCustomerId().isEmpty()))\r\n        {\r\n            ResponseEntity<?> proxyResponse=customerProxy.registerCustomer(customer);\r\n            System.out.println(proxyResponse.getBody());\r\n        }\r\n        return customer1;\r\n    }\r\n\r\n    public Customer updateCustomer(Customer customer, String customerId) throws CustomerNotFoundException {\r\n        if(customerRepo.findById(customerId).isPresent()) {\r\n            return customerRepo.save(customer);\r\n        }\r\n        else {\r\n            throw new CustomerNotFoundException();\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public String addFavoriteRestaurant(String resId,String customerId) throws CustomerNotFoundException {\r\n        System.out.println(\"Inside\");\r\n        System.out.println(\"Inside Imple :\" + customerRepo.findById(customerId).get() +\"Object :\"+resId);\r\n        Customer optionalCustomer=customerRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);\r\n        if(optionalCustomer.getCustomerFavRestaurants()==null)\r\n        {\r\n            optionalCustomer.setCustomerFavRestaurants(new ArrayList<>());\r\n        }\r\n\r\n        List<String> favList = optionalCustomer.getCustomerFavRestaurants();\r\n        favList.add(resId);\r\n        customerRepo.save(optionalCustomer);\r\n        return \"Favourite Restaurant added\";\r\n    }\r\n\r\n    @Override\r\n    public String addFavoriteDish(Object obj, String customerId) throws CustomerNotFoundException {\r\n        Customer customer= customerRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);\r\n\r\n        if (customer.getCustomerFavDishes() == null) {\r\n            customer.setCustomerFavDishes(new ArrayList<>());\r\n        }\r\n\r\n        List<Object> favDishList = customer.getCustomerFavDishes();\r\n        favDishList.add(obj);\r\n        customerRepo.save(customer);\r\n        return \"Dish added to your favorites...\";\r\n\r\n    }\r\n\r\n    @Override\r\n    public List<String> getAllFavRestaurant(String customerId) {\r\n\r\n        Optional<Customer> restCustomer = customerRepo.findById(customerId);\r\n        System.out.println(restCustomer.get());\r\n        return restCustomer.get().getCustomerFavRestaurants();\r\n    }\r\n\r\n    @Override\r\n    public List<Object> getAllFavDishes(String customerId) {\r\n        Optional<Customer> restCustomer = customerRepo.findById(customerId);\r\n        System.out.println(restCustomer.get());\r\n        return restCustomer.get().getCustomerFavDishes();\r\n    }\r\n\r\n    @Override\r\n    public Customer getCustomerById(String customerId) throws CustomerNotFoundException {\r\n        return customerRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);\r\n    }\r\n\r\n    @Override\r\n    public boolean deleteFavRestaurant(String customerId,Object resId) throws CustomerNotFoundException {\r\n        boolean isDeleted=false;\r\n        Optional<Customer> optionalCustomer=customerRepo.findById(customerId);\r\n\r\n        if(optionalCustomer.isEmpty())\r\n        {\r\n            throw new CustomerNotFoundException();\r\n        }\r\n        Customer customer=optionalCustomer.get();\r\n        List<String> favRestList= customer.getCustomerFavRestaurants();\r\n        favRestList.remove(resId);\r\n        customer.setCustomerFavRestaurants(favRestList);\r\n        customerRepo.save(customer);\r\n        isDeleted=true;\r\n\r\n        return isDeleted;\r\n    }\r\n    public boolean deleteFavDish(String customerId,Object dish) throws CustomerNotFoundException {\r\n        boolean isDeleted=false;\r\n        Optional<Customer> optionalCustomer=customerRepo.findById(customerId);\r\n\r\n        if(optionalCustomer.isEmpty())\r\n        {\r\n            throw new CustomerNotFoundException();\r\n        }\r\n        Customer customer=optionalCustomer.get();\r\n\r\n        List<Object> favList = customer.getCustomerFavDishes();\r\n        favList.remove(dish);\r\n        customer.setCustomerFavDishes(favList);\r\n        customerRepo.save(customer);\r\n        isDeleted=true;\r\n\r\n        return isDeleted;\r\n    }\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java b/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java
+--- a/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java	(date 1718139653465)
+@@ -20,6 +20,11 @@
+     private CustomerRepo customerRepo;
+     @Autowired
+     private CustomerProxy customerProxy;
++
++    @Override
++    public Customer testRegister(Customer customer){
++        return this.customerRepo.save(customer);
++    }
+     @Override
+     public Customer registerCustomer(Customer customer) throws CustomerAlreadyExistException {
+         if(customerRepo.findById(customer.getCustomerId()).isPresent()) {
+@@ -31,9 +36,7 @@
+         if(customer.getCustomerFavRestaurants() == null) {
+             customer.setCustomerFavRestaurants(new ArrayList<>());
+         }
+-//
+-//        customerProxy.registerCustomer(customer);
+-//        return customerRepo.save(customer);
++
+         Customer customer1=customerRepo.save(customer);
+         if(!(customer1.getCustomerId().isEmpty()))
+         {
+@@ -104,7 +107,7 @@
+     }
+ 
+     @Override
+-    public boolean deleteFavRestaurant(String customerId,Object resId) throws CustomerNotFoundException {
++    public boolean deleteFavRestaurant(String customerId,String resId) throws CustomerNotFoundException {
+         boolean isDeleted=false;
+         Optional<Customer> optionalCustomer=customerRepo.findById(customerId);
+ 
+Index: customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.bej.customersapiservice.controller;\r\n\r\nimport com.bej.customersapiservice.domain.Customer;\r\nimport com.bej.customersapiservice.emails.IGenerateEmails;\r\nimport com.bej.customersapiservice.exception.CustomerAlreadyExistException;\r\nimport com.bej.customersapiservice.exception.CustomerNotFoundException;\r\nimport com.bej.customersapiservice.services.EmailService;\r\nimport com.bej.customersapiservice.services.ICustomerService;\r\nimport jakarta.servlet.http.HttpServletRequest;\r\nimport org.springframework.beans.factory.annotation.Autowired;\r\nimport org.springframework.data.annotation.Id;\r\nimport org.springframework.http.HttpStatus;\r\nimport org.springframework.http.ResponseEntity;\r\nimport org.springframework.web.bind.annotation.*;\r\n\r\n@RestController\r\n@RequestMapping(\"/api/v2\")\r\n@CrossOrigin\r\npublic class CustomerController {\r\n\r\n    @Autowired\r\n    private ICustomerService iCustomerService;\r\n\r\n    @Autowired\r\n    private EmailService emailService;\r\n\r\n    @Autowired\r\n    private IGenerateEmails iGenerateEmails;\r\n\r\n    @PostMapping(\"/register\")\r\n    public ResponseEntity registerCustomer(@RequestBody Customer customer) {\r\n        try {\r\n            ResponseEntity<?> response =  new ResponseEntity(iCustomerService.registerCustomer(customer), HttpStatus.CREATED);\r\n            emailService.sendEmail(customer.getCustomerEmail(),\"Welcome To DishDash\", iGenerateEmails.generateWelcomeEmail(customer.getCustomerName(), customer.getCustomerEmail(), customer.getCustomerPassword()));\r\n            return response;\r\n        } catch (CustomerAlreadyExistException e) {\r\n            return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);\r\n        }\r\n    }\r\n\r\n    @PutMapping(\"/customers/update\")\r\n    public ResponseEntity updateCustomer(@RequestBody Customer customer, HttpServletRequest request) {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        try {\r\n            return new ResponseEntity(iCustomerService.updateCustomer(customer, customerId), HttpStatus.OK);\r\n        } catch (Exception e) {\r\n            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);\r\n        }\r\n    }\r\n\r\n    @PutMapping(\"/customers/addfavres\")\r\n    public ResponseEntity updateFavRest(@RequestBody String obj, HttpServletRequest request) throws CustomerNotFoundException {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.addFavoriteRestaurant(obj,customerId),HttpStatus.OK);\r\n    }\r\n\r\n    @PutMapping(\"/customers/addfavdish\")\r\n    public ResponseEntity updateFavDish(@RequestBody Object obj, HttpServletRequest request) throws CustomerNotFoundException {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.addFavoriteDish(obj,customerId),HttpStatus.OK);\r\n    }\r\n\r\n    @GetMapping(\"/customers/restaurant\")\r\n    public ResponseEntity fetchFavRest(HttpServletRequest request)\r\n    {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.getAllFavRestaurant(customerId),HttpStatus.OK);\r\n    }\r\n    @GetMapping(\"/customers/dishes\")\r\n    public ResponseEntity fetchFavDish(HttpServletRequest request)\r\n    {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.getAllFavDishes(customerId),HttpStatus.OK);\r\n    }\r\n    @GetMapping(\"/eachcustomer\")\r\n    public ResponseEntity<?> fetchByJwtToken(HttpServletRequest request) throws CustomerNotFoundException {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.getCustomerById(customerId),HttpStatus.OK);\r\n    }\r\n    @DeleteMapping(\"/customers/deletedish\")\r\n    public ResponseEntity<?> deleteFavDish(@RequestBody Object dish, HttpServletRequest request) throws CustomerNotFoundException {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.deleteFavDish(customerId,dish),HttpStatus.OK);\r\n    }\r\n    @DeleteMapping(\"/customers/deletedrestaurant/{restName}\")\r\n    public ResponseEntity<?> deleteFavRest(@RequestBody Object restName, HttpServletRequest request) throws CustomerNotFoundException {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.deleteFavRestaurant(customerId,restName),HttpStatus.OK);\r\n    }\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java b/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java
+--- a/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java	(date 1718142105504)
+@@ -15,7 +15,7 @@
+ 
+ @RestController
+ @RequestMapping("/api/v2")
+-@CrossOrigin
++@CrossOrigin(origins = "http://localhost:4200")
+ public class CustomerController {
+ 
+     @Autowired
+@@ -27,6 +27,11 @@
+     @Autowired
+     private IGenerateEmails iGenerateEmails;
+ 
++    @PostMapping("/registertest")
++    public ResponseEntity registerCustomertest(@RequestBody Customer customer) {
++        return new ResponseEntity(iCustomerService.testRegister(customer), HttpStatus.CREATED);
++    }
++
+     @PostMapping("/register")
+     public ResponseEntity registerCustomer(@RequestBody Customer customer) {
+         try {
+@@ -72,7 +77,7 @@
+         String customerId = (String) request.getAttribute("customerId");
+         return new ResponseEntity<>(iCustomerService.getAllFavDishes(customerId),HttpStatus.OK);
+     }
+-    @GetMapping("/eachcustomer")
++    @GetMapping("/customers/eachcustomer")
+     public ResponseEntity<?> fetchByJwtToken(HttpServletRequest request) throws CustomerNotFoundException {
+         String customerId = (String) request.getAttribute("customerId");
+         return new ResponseEntity<>(iCustomerService.getCustomerById(customerId),HttpStatus.OK);
+@@ -82,10 +87,10 @@
+         String customerId = (String) request.getAttribute("customerId");
+         return new ResponseEntity<>(iCustomerService.deleteFavDish(customerId,dish),HttpStatus.OK);
+     }
+-    @DeleteMapping("/customers/deletedrestaurant/{restName}")
+-    public ResponseEntity<?> deleteFavRest(@RequestBody Object restName, HttpServletRequest request) throws CustomerNotFoundException {
++    @DeleteMapping("/customers/deleterestaurant")
++    public ResponseEntity<?> deleteFavRest(@RequestParam String resId, HttpServletRequest request) throws CustomerNotFoundException {
+         String customerId = (String) request.getAttribute("customerId");
+-        return new ResponseEntity<>(iCustomerService.deleteFavRestaurant(customerId,restName),HttpStatus.OK);
++        return new ResponseEntity<>(iCustomerService.deleteFavRestaurant(customerId,resId),HttpStatus.OK);
+     }
+ 
+ }
+Index: ../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.css
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>.photos img {\r\n    height: 100%;\r\n}\r\n\r\n.photos {\r\n    height: 30vh;\r\n    border: 2px solid black;\r\n    overflow: hidden;\r\n}\r\n.descriptionbox .right {\r\n}\r\n\r\n.right .fav {\r\n    width: 70%;\r\n    height: 100%;\r\n}\r\n\r\n.menubox {\r\n    height: 100%;\r\n}\r\n\r\n.menubox p {\r\n    cursor: pointer;\r\n    font-weight: bold;\r\n}\r\n.menuright {\r\n    max-width: 100%;\r\n\r\n}\r\n\r\n.menuitem {\r\n    height: 20vh;\r\n    max-width: 100%;\r\n    overflow: hidden;\r\n\r\n}\r\n\r\n.menuitem .part1 {\r\n    width: 30%;\r\n    display: flex;\r\n    justify-content: center;\r\n    align-items: center;\r\n    align-items: center;\r\n   \r\n}\r\n.menuitem .part1 img {\r\n    width: 100%;\r\n    height: 100%;\r\n    object-fit: cover;\r\n}\r\n\r\n.menuitem .part2 {\r\n    width: 50%;\r\n}\r\n\r\n.fav {\r\n    font-size: 40px;\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.css b/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.css
+--- a/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.css	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.css	(date 1718168658666)
+@@ -29,7 +29,7 @@
+ }
+ 
+ .menuitem {
+-    height: 20vh;
++    /* height: 20vh; */
+     max-width: 100%;
+     overflow: hidden;
+ 
+Index: ../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><div class=\"restaurantbox\" *ngIf=\"oneRestaurant\">\r\n    <div class=\"infobox bg-light p-3 m-3\">\r\n        <div class=\"photos flex\">\r\n            <img alt=\"Restaurant\" *ngFor=\"let x of oneRestaurant.resImages\" [src]=\"x\">\r\n            \r\n        </div>\r\n        <div class=\"descriptionbox flex justify-content-between\">\r\n            <div class=\"left\">\r\n                <h2>{{oneRestaurant.resName}}</h2>\r\n                <p>{{oneRestaurant.resCuisines}}</p>\r\n                <span>{{oneRestaurant.resAddress}}</span>\r\n            </div>\r\n            <div class=\"right flex \">\r\n                <span>{{oneRestaurant.resRating}}</span>\r\n                <mat-icon class=\"fav\" fontIcon=\"favorite_border\" (click)=\"toogleFav()\" ></mat-icon>\r\n            </div>\r\n        </div>\r\n    </div>\r\n\r\n    <div class=\"menubox bg-light flex p-3 m-3\">\r\n        <div class=\"menuleft bg-danger-subtle p-3\">\r\n\r\n            <p *ngFor=\"let category of categoryArray\">{{category[0]}} ({{category[1]}})</p>\r\n        </div>\r\n\r\n        <div class=\"menuright\">\r\n            <!-- <div class=\"categories\" *ngFor=\"let category of oneRestaurant.resCategories\">\r\n                <h4>{{category}}</h4>\r\n            </div> -->\r\n        \r\n            <div class=\"menuitem bg-body-secondary flex p-2 m-2 mb-3 gap-3\" *ngFor=\"let menu of oneRestaurant.resMenu\">\r\n                <div class=\"part1\">\r\n                    <img [src]=\"menu.dishImage\" alt=\"\">\r\n                </div>\r\n                <div class=\"part2\">\r\n                    <h5 class=\"m-0\">{{menu.dishName}}</h5>\r\n                    <p class=\"m-0\">{{menu.dishRating}} people rated</p>\r\n                    <p class=\"m-0\">Rs {{menu.dishPrice}}/-</p>\r\n                    <span class=\"m-0\">{{menu.dishDescription}}</span>\r\n                </div>\r\n\r\n            </div>\r\n        </div>\r\n    </div>\r\n</div>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.html b/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.html
+--- a/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.html	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.html	(date 1718170740250)
+@@ -2,17 +2,18 @@
+     <div class="infobox bg-light p-3 m-3">
+         <div class="photos flex">
+             <img alt="Restaurant" *ngFor="let x of oneRestaurant.resImages" [src]="x">
+-            
++
+         </div>
+         <div class="descriptionbox flex justify-content-between">
+             <div class="left">
+-                <h2>{{oneRestaurant.resName}}</h2>
++                <h2 >{{oneRestaurant.resName}}</h2>
+                 <p>{{oneRestaurant.resCuisines}}</p>
+                 <span>{{oneRestaurant.resAddress}}</span>
+             </div>
+             <div class="right flex ">
++
+                 <span>{{oneRestaurant.resRating}}</span>
+-                <mat-icon class="fav" fontIcon="favorite_border" (click)="toogleFav()" ></mat-icon>
++                <mat-icon class="fav" [fontIcon]="isFavorite ? 'favorite':'favorite_border'" (click)="toogleFav()" ></mat-icon>
+             </div>
+         </div>
+     </div>
+@@ -20,26 +21,37 @@
+     <div class="menubox bg-light flex p-3 m-3">
+         <div class="menuleft bg-danger-subtle p-3">
+ 
+-            <p *ngFor="let category of categoryArray">{{category[0]}} ({{category[1]}})</p>
++            <p class="pointer" *ngFor="let category of categoryArray" (click)="scrollToCateogry(category[0])">{{category[0]}} ({{category[1]}})</p>
+         </div>
+ 
+         <div class="menuright">
+-            <!-- <div class="categories" *ngFor="let category of oneRestaurant.resCategories">
+-                <h4>{{category}}</h4>
+-            </div> -->
+-        
+-            <div class="menuitem bg-body-secondary flex p-2 m-2 mb-3 gap-3" *ngFor="let menu of oneRestaurant.resMenu">
+-                <div class="part1">
+-                    <img [src]="menu.dishImage" alt="">
+-                </div>
+-                <div class="part2">
+-                    <h5 class="m-0">{{menu.dishName}}</h5>
+-                    <p class="m-0">{{menu.dishRating}} people rated</p>
+-                    <p class="m-0">Rs {{menu.dishPrice}}/-</p>
+-                    <span class="m-0">{{menu.dishDescription}}</span>
++            <div class="menuitem bg-body-secondary flex p-2 m-2 mb-3 gap-3" *ngFor="let category of categoryWiseDishesArray">
++                <div class="wholeCategory" id="{{category[0]}}">
++                    <div class="headine">
++                        <h4>{{category[0]}}</h4>
++                    </div>
++
++                    <div class="menuItems">
++                        <div class="oneItem flex p-2 m-2 gap-3 bg-body-tertiary" *ngFor="let item of category[1]">
++
++                            <div class="part1">
++                                <img [src]="item.dishImage" alt="">
++                            </div>
++                            <div class="part2">
++                                <h5 class="m-0">{{item.dishName}}</h5>
++                                <p class="m-0">{{item.dishRating}} people rated</p>
++                                <p class="m-0">Rs {{item.dishPrice}}/-</p>
++                                <span class="m-0">{{item.dishDescription}}</span>
++                            </div>
++                        </div>
++
++                    </div>
+                 </div>
++               
+ 
+             </div>
++
++            
+         </div>
+     </div>
+ </div>
+Index: ../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import { Component, OnInit } from '@angular/core';\r\nimport { ActivatedRoute } from '@angular/router';\r\nimport { reduce } from 'rxjs';\r\nimport { restaurant } from '../../Model/restaurant';\r\nimport { RestaurantService } from '../../services/restaurant.service';\r\nimport { CookieService } from 'ngx-cookie-service';\r\nimport { Dialog } from '@angular/cdk/dialog';\r\nimport { LoginalertComponent } from '../loginalert/loginalert.component';\r\n\r\n@Component({\r\n  selector: 'app-restaurantview',\r\n  templateUrl: './restaurantview.component.html',\r\n  styleUrl: './restaurantview.component.css'\r\n})\r\nexport class RestaurantviewComponent implements OnInit {\r\n\r\n  oneRestaurant:restaurant;\r\n  categoryAndCount = new Map();\r\n  categoryArray:[string, number][]=[];\r\n\r\n  constructor(private ac:ActivatedRoute, private resService:RestaurantService, private cookieService:CookieService, private dialog:Dialog) {}\r\n\r\n  ngOnInit(): void {\r\n    this.ac.paramMap.subscribe({\r\n      next:data => {\r\n        let restId = data.get(\"resid\")\r\n        console.log(restId);\r\n        this.resService.fetchRestaurantByid(restId).subscribe({\r\n          next:data => {\r\n            console.log(data);\r\n            this.oneRestaurant = data;\r\n            this.prepareMapForCategories();\r\n            this.categoryArray = Array.from(this.categoryAndCount.entries())\r\n            console.log(this.categoryArray);\r\n          }\r\n        })\r\n\r\n      },\r\n      error:e => {\r\n        console.log(e);\r\n      }\r\n    })\r\n  }\r\n\r\n  toogleFav() {\r\nif(!this.cookieService.get(\"token\")) {\r\nthis.dialog.open(LoginalertComponent)\r\n}\r\n  }\r\n\r\n  prepareMapForCategories() {\r\n    \r\n   \r\n    for(let cateogry of this.oneRestaurant.resCategories) {\r\n      let count =0\r\n      for(let dish of this.oneRestaurant.resMenu) {\r\n        if(dish.dishCategory.toLowerCase() == cateogry.toLowerCase()) {\r\n          count++;\r\n        }\r\n      }\r\n      this.categoryAndCount.set(cateogry,count);\r\n    }\r\n  \r\n  }\r\n\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.ts b/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.ts
+--- a/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.ts	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.ts	(date 1718170690591)
+@@ -1,67 +1,174 @@
+ import { Component, OnInit } from '@angular/core';
+ import { ActivatedRoute } from '@angular/router';
+-import { reduce } from 'rxjs';
+ import { restaurant } from '../../Model/restaurant';
+ import { RestaurantService } from '../../services/restaurant.service';
+ import { CookieService } from 'ngx-cookie-service';
+-import { Dialog } from '@angular/cdk/dialog';
++import { MatDialog } from '@angular/material/dialog';
+ import { LoginalertComponent } from '../loginalert/loginalert.component';
++import { UserService } from '../../services/user.service';
++import { customer } from '../../Model/customer';
++import { dish } from '../../Model/dish';
+ 
+ @Component({
+   selector: 'app-restaurantview',
+   templateUrl: './restaurantview.component.html',
+-  styleUrl: './restaurantview.component.css'
++  styleUrls: ['./restaurantview.component.css'], // Corrected styleUrls
+ })
+ export class RestaurantviewComponent implements OnInit {
+-
+-  oneRestaurant:restaurant;
++  oneRestaurant: restaurant;
+   categoryAndCount = new Map();
+-  categoryArray:[string, number][]=[];
++  categoryArray: [string, number][] = [];
++  isFavorite: boolean = false;
++  custFavorites: string[] = [];
+ 
+-  constructor(private ac:ActivatedRoute, private resService:RestaurantService, private cookieService:CookieService, private dialog:Dialog) {}
++  categoryWise =new Map();
++  categoryWiseDishesArray:[string, dish[]][] = [];
++  // activeCustomer:customer;
++
++  constructor(
++    private ac: ActivatedRoute,
++    private resService: RestaurantService,
++    private cookieService: CookieService,
++    public dialog: MatDialog,
++    private userService: UserService
++  ) {}
+ 
+   ngOnInit(): void {
+     this.ac.paramMap.subscribe({
+-      next:data => {
+-        let restId = data.get("resid")
+-        console.log(restId);
+-        this.resService.fetchRestaurantByid(restId).subscribe({
+-          next:data => {
+-            console.log(data);
+-            this.oneRestaurant = data;
+-            this.prepareMapForCategories();
+-            this.categoryArray = Array.from(this.categoryAndCount.entries())
+-            console.log(this.categoryArray);
+-          }
+-        })
++      next: data => {
++        let restId = data.get('resid');
++        this.fetchRestaurantById(restId);
++      },
++      error: e => {
++        console.log(e);
++      }
++    });
++
++    
++  }
++
++  fetchRestaurantById(id: string) {
++    this.resService.fetchRestaurantByid(id).subscribe({
++      next: data => {
++        this.oneRestaurant = data;
++        this.prepareMapForCategories();
++        this.categoryArray = Array.from(this.categoryAndCount.entries());
+ 
++        this.prepareCategoryWise();
++        this.categoryWiseDishesArray = Array.from(this.categoryWise.entries());
++
++     
++        if (this.cookieService.get('token')) {
++    
++          this.fetchActiveCustomer()
++        }
+       },
++      error: e => {
++      
++      }
++    });
++  }
++
++  fetchActiveCustomer() {
++    const Jwt = this.cookieService.get('token');
++
++    this.userService.fetchCustomerFavByJwt(Jwt).subscribe({
++      next:data => {
++        this.custFavorites = data;
++        console.log("Best Coming " +data)
++
++        if (this.oneRestaurant && this.custFavorites.includes(this.oneRestaurant.resId)) {
++                this.isFavorite = true;
++              }
++      },
+       error:e => {
+-        console.log(e);
++        console.log("Error in fetch cust fav")
+       }
+     })
++
+   }
+ 
+   toogleFav() {
+-if(!this.cookieService.get("token")) {
+-this.dialog.open(LoginalertComponent)
+-}
++    if (!this.cookieService.get('token')) {
++      this.openLoginAlertDialog('3000ms', '1500ms');
++      return; // Stop further execution if user is not logged in
++    }
++
++    this.isFavorite = !this.isFavorite;
++    const Jwt = this.cookieService.get('token');
++
++    if (this.isFavorite) {
++      console.log("Addintion Request")
++    
++      this.userService.sendFavoriteRestToCustomer(this.oneRestaurant.resId, Jwt).subscribe({
++        next:data => {
++          console.log("Added Success")
++        },
++        error:e  => {
++          console.log(e)
++        }
++      });
++    } else {
++      console.log("Deletion Request")
++      this.userService.DeleteFavoriteRestFromCustomer(this.oneRestaurant.resId, Jwt).subscribe({
++        next:data =>{
++          console.log("Deletion Success")
++        },
++        error:e => {
++          console.log("Error in deletion")
++          console.log(e)
++        }
++      })
++
++      // Implement functionality to remove favorite if needed
++    }
+   }
++
++  openLoginAlertDialog(
++    enterAnimationDuration: string,
++    exitAnimationDuration: string
++  ): void {
++    this.dialog.open(LoginalertComponent, {
++      width: '400px',
++    });
++  }
+ 
+   prepareMapForCategories() {
+-    
+-   
+-    for(let cateogry of this.oneRestaurant.resCategories) {
+-      let count =0
+-      for(let dish of this.oneRestaurant.resMenu) {
+-        if(dish.dishCategory.toLowerCase() == cateogry.toLowerCase()) {
++    for (let category of this.oneRestaurant.resCategories) {
++      let count = 0;
++      for (let dish of this.oneRestaurant.resMenu) {
++        if (dish.dishCategory.toLowerCase() == category.toLowerCase()) {
+           count++;
+         }
+       }
+-      this.categoryAndCount.set(cateogry,count);
++      this.categoryAndCount.set(category, count);
+     }
+-  
++  }
++
++  prepareCategoryWise() {
++    let dishesInOneCategory=[]
++    for(let category of this.oneRestaurant.resCategories) {
++ 
++      for(let dish of this.oneRestaurant.resMenu) {
++        if(dish.dishCategory.toLowerCase() == category.toLowerCase()) {
++          dishesInOneCategory.push(dish);
++        }
++      }
++      this.categoryWise.set(category, dishesInOneCategory)
++      dishesInOneCategory=[]
++      
++    }
++    console.log("MyDisWise Map" +dishesInOneCategory);
+   }
+ 
++  scrollToCateogry(category:string) {
++    console.log("Scroll Called")
++    const element = document.getElementById(category);
++    console.log(element);
+ 
++    if(element) {
++      element.scrollIntoView({behavior:'smooth'})
++    }
++  }
++
+ }
+Index: ../FrontEnd/DishDash/src/app/Model/customer.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import { address } from \"./address\"\r\nimport { favdishes } from \"./favdishes\"\r\nimport { favrestaurant } from \"./favrestaurant\"\r\n\r\nexport class customer {\r\n    customerName: string\r\n    customerEmail: string\r\n    customerPassword: string\r\n    customerProfilePic?: string\r\n    customerPhone: number\r\n    customerAddress?:address[]\r\n    customerFavRestaurant?:favrestaurant[]\r\n    customerFavDishes?:favdishes[]\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Model/customer.ts b/../FrontEnd/DishDash/src/app/Model/customer.ts
+--- a/../FrontEnd/DishDash/src/app/Model/customer.ts	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Model/customer.ts	(date 1718137198867)
+@@ -9,6 +9,6 @@
+     customerProfilePic?: string
+     customerPhone: number
+     customerAddress?:address[]
+-    customerFavRestaurant?:favrestaurant[]
++    customerFavRestaurants?:string[]
+     customerFavDishes?:favdishes[]
+-}
+\ No newline at end of file
++}
+Index: ../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import { Component, OnInit } from '@angular/core';\r\nimport { UserService } from '../../services/user.service';\r\nimport { customer } from '../../Model/customer';\r\nimport { CookieService } from 'ngx-cookie-service';\r\nimport { RestaurantService } from '../../services/restaurant.service';\r\nimport { restaurant } from '../../Model/restaurant';\r\n\r\n@Component({\r\n  selector: 'app-cutomerfavourite',\r\n  templateUrl: './cutomerfavourite.component.html',\r\n  styleUrl: './cutomerfavourite.component.css'\r\n})\r\nexport class CutomerfavouriteComponent implements OnInit {\r\n  activeCustomer:customer;\r\n  customerJwt:string;\r\n  restIds:string[]=[];\r\n  restaurants:restaurant[]=[]\r\n\r\n\r\n  constructor(private userService:UserService, private cookieService:CookieService, private restService:RestaurantService) {}\r\n\r\n  ngOnInit(): void {\r\n    this.customerJwt = this.cookieService.get(\"token\");\r\n    this.userService.fetchCustomerFavByJwt(this.customerJwt).subscribe({\r\n      next:data => {\r\n        this.restIds = data;\r\n      },\r\n      error:e => [\r\n        console.log(\"Error\")\r\n      ]\r\n    })\r\n\r\n   \r\n  }\r\n\r\nfetchRestById(restId:string) {\r\n  this.restService.fetchRestaurantByid(restId).subscribe({\r\n    next:data => {\r\n      this.restaurants.push(data);\r\n    }\r\n  })\r\n}\r\n\r\n  fetchCustomerFavourites() {\r\n\r\n  }\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.ts b/../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.ts
+--- a/../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.ts	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.ts	(date 1718145256242)
+@@ -14,7 +14,8 @@
+   activeCustomer:customer;
+   customerJwt:string;
+   restIds:string[]=[];
+-  restaurants:restaurant[]=[]
++  restaurants:restaurant[]=[];
++  favRestPresent = false;
+ 
+ 
+   constructor(private userService:UserService, private cookieService:CookieService, private restService:RestaurantService) {}
+@@ -24,6 +25,9 @@
+     this.userService.fetchCustomerFavByJwt(this.customerJwt).subscribe({
+       next:data => {
+         this.restIds = data;
++        if(this.restIds.length >0) {
++          this.fetchRestById(this.restIds);
++        }
+       },
+       error:e => [
+         console.log("Error")
+@@ -33,16 +37,7 @@
+    
+   }
+ 
+-fetchRestById(restId:string) {
+-  this.restService.fetchRestaurantByid(restId).subscribe({
+-    next:data => {
+-      this.restaurants.push(data);
+-    }
+-  })
+-}
+-
+-  fetchCustomerFavourites() {
++fetchRestById(restIds:string[]) {
++  this.favRestPresent = true;
+ 
+-  }
+-
+-}
++  for(let restId of
+\ No newline at end of file
+Index: ../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><mat-icon  aria-hidden=\"false\" aria-label=\"Example home icon\" fontIcon=\"alert\"></mat-icon>\r\n\r\n<h3>Login Alert</h3>\r\n<p (click)=\"openLoginDialog()\">Do login First</p>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.html b/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.html
+--- a/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.html	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.html	(date 1718132815224)
+@@ -1,4 +1,14 @@
+-<mat-icon  aria-hidden="false" aria-label="Example home icon" fontIcon="alert"></mat-icon>
+-
+-<h3>Login Alert</h3>
+-<p (click)="openLoginDialog()">Do login First</p>
+\ No newline at end of file
++<div class=" header flex justify-content-between align-items">
++    <button mat-icon-button class="close-button" (click)="closeDialog()">
++      <mat-icon>close</mat-icon>
++    </button>
++  </div>
++<div>
++<h1 mat-dialog-title>  <mat-icon  aria-hidden="false" aria-label="Example home icon" fontIcon="error"></mat-icon></h1>
++<div mat-dialog-content>
++  <!-- Your content here -->
++   <h4>You need to Login First</h4>
++   <a class="login pointer" (click)="openLoginDialog()">Here you can login
++   </a>
++</div>
++</div>
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"9c8a6dba-7c8c-426b-ad82-e45f53e77f5c\" name=\"Changes\" comment=\"\">\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/RestaurantService/src/main/java/com/example/RestaurantService/controller/RestaurantController.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/RestaurantService/src/main/java/com/example/RestaurantService/controller/RestaurantController.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/RestaurantService/src/main/java/com/example/RestaurantService/exception/NoRestaurantAvailableException.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/RestaurantService/src/main/java/com/example/RestaurantService/exception/NoRestaurantAvailableException.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/RestaurantService/src/main/java/com/example/RestaurantService/service/IRestaurantService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/RestaurantService/src/main/java/com/example/RestaurantService/service/IRestaurantService.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/RestaurantService/src/main/java/com/example/RestaurantService/service/ImplRestaurantService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/RestaurantService/src/main/java/com/example/RestaurantService/service/ImplRestaurantService.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/domain/Customer.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/domain/Customer.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Interface\" />\r\n        <option value=\"Class\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$/..\" />\r\n  </component>\r\n  <component name=\"MarkdownSettingsMigration\">\r\n    <option name=\"stateVersion\" value=\"1\" />\r\n  </component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 7\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"2hRdb5bzKy99WtrSghQJjDoSedT\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">{\r\n  &quot;keyToString&quot;: {\r\n    &quot;Application.ApiGateawayApplication.executor&quot;: &quot;Run&quot;,\r\n    &quot;Application.CustomersapiserviceApplication.executor&quot;: &quot;Run&quot;,\r\n    &quot;Application.EurekaDiscoveryServerApplication.executor&quot;: &quot;Run&quot;,\r\n    &quot;Application.RestaurantServiceApplication.executor&quot;: &quot;Run&quot;,\r\n    &quot;Application.UserAuthenticationServiceApplication.executor&quot;: &quot;Run&quot;,\r\n    &quot;Application.abc.executor&quot;: &quot;Run&quot;,\r\n    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,\r\n    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,\r\n    &quot;git-widget-placeholder&quot;: &quot;dev-v1&quot;,\r\n    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,\r\n    &quot;last_opened_file_path&quot;: &quot;D:/Personal Folders/SND/major-capstone-project/BackEnd&quot;,\r\n    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;\r\n  }\r\n}</component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"CopyFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Users\\Avish Madaan\\Desktop\\NIIT\\Phase 2\\Course 14 - Capstone Project\\major-capstone-project\\FoodieApp\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunManager\" selected=\"Application.RestaurantServiceApplication\">\r\n    <configuration name=\"ApiGateawayApplication\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"com.example.ApiGateaway.ApiGateawayApplication\" />\r\n      <module name=\"ApiGateaway\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"com.example.ApiGateaway.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"CustomersapiserviceApplication\" type=\"Application\" factoryName=\"Application\" temporary=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"com.bej.customersapiservice.CustomersapiserviceApplication\" />\r\n      <module name=\"customersapiservice\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"com.bej.customersapiservice.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"EurekaDiscoveryServerApplication\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"com.example.EurekaDiscoveryServer.EurekaDiscoveryServerApplication\" />\r\n      <module name=\"EurekaDiscoveryServer\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"com.example.EurekaDiscoveryServer.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"RestaurantServiceApplication\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"com.example.RestaurantService.RestaurantServiceApplication\" />\r\n      <module name=\"RestaurantService\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"com.example.RestaurantService.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"UserAuthenticationServiceApplication\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"com.example.UserAuthenticationService.UserAuthenticationServiceApplication\" />\r\n      <module name=\"UserAuthenticationService\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"com.example.UserAuthenticationService.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <list>\r\n      <item itemvalue=\"Application.RestaurantServiceApplication\" />\r\n      <item itemvalue=\"Application.ApiGateawayApplication\" />\r\n      <item itemvalue=\"Application.CustomersapiserviceApplication\" />\r\n      <item itemvalue=\"Application.EurekaDiscoveryServerApplication\" />\r\n      <item itemvalue=\"Application.UserAuthenticationServiceApplication\" />\r\n    </list>\r\n    <recent_temporary>\r\n      <list>\r\n        <item itemvalue=\"Application.RestaurantServiceApplication\" />\r\n        <item itemvalue=\"Application.CustomersapiserviceApplication\" />\r\n        <item itemvalue=\"Application.EurekaDiscoveryServerApplication\" />\r\n        <item itemvalue=\"Application.ApiGateawayApplication\" />\r\n        <item itemvalue=\"Application.UserAuthenticationServiceApplication\" />\r\n      </list>\r\n    </recent_temporary>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"9c8a6dba-7c8c-426b-ad82-e45f53e77f5c\" name=\"Changes\" comment=\"\" />\r\n      <created>1717560898011</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1717560898011</updated>\r\n    </task>\r\n    <servers />\r\n  </component>\r\n  <component name=\"XSLT-Support.FileAssociations.UIState\">\r\n    <expand />\r\n    <select />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/.idea/workspace.xml	(date 1718164748955)
+@@ -6,13 +6,21 @@
+   <component name="ChangeListManager">
+     <list default="true" id="9c8a6dba-7c8c-426b-ad82-e45f53e77f5c" name="Changes" comment="">
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/RestaurantService/src/main/java/com/example/RestaurantService/controller/RestaurantController.java" beforeDir="false" afterPath="$PROJECT_DIR$/RestaurantService/src/main/java/com/example/RestaurantService/controller/RestaurantController.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/RestaurantService/src/main/java/com/example/RestaurantService/exception/NoRestaurantAvailableException.java" beforeDir="false" afterPath="$PROJECT_DIR$/RestaurantService/src/main/java/com/example/RestaurantService/exception/NoRestaurantAvailableException.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/RestaurantService/src/main/java/com/example/RestaurantService/service/IRestaurantService.java" beforeDir="false" afterPath="$PROJECT_DIR$/RestaurantService/src/main/java/com/example/RestaurantService/service/IRestaurantService.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/RestaurantService/src/main/java/com/example/RestaurantService/service/ImplRestaurantService.java" beforeDir="false" afterPath="$PROJECT_DIR$/RestaurantService/src/main/java/com/example/RestaurantService/service/ImplRestaurantService.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/domain/Customer.java" beforeDir="false" afterPath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/domain/Customer.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/domain/Customer.java" beforeDir="false" afterPath="$PROJECT_DIR$/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/domain/Customer.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/UserAuthenticationService/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/UserAuthenticationService/src/main/resources/application.properties" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/customersapiservice/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/customersapiservice/pom.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/CustomersapiserviceApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/CustomersapiserviceApplication.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.css" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.css" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.html" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.html" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Model/customer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Model/customer.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/services/user.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/services/user.service.ts" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -62,7 +70,7 @@
+       <recent name="C:\Users\Avish Madaan\Desktop\NIIT\Phase 2\Course 14 - Capstone Project\major-capstone-project\FoodieApp" />
+     </key>
+   </component>
+-  <component name="RunManager" selected="Application.RestaurantServiceApplication">
++  <component name="RunManager">
+     <configuration name="ApiGateawayApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+       <option name="MAIN_CLASS_NAME" value="com.example.ApiGateaway.ApiGateawayApplication" />
+       <module name="ApiGateaway" />
+@@ -137,11 +145,11 @@
+     </list>
+     <recent_temporary>
+       <list>
+-        <item itemvalue="Application.RestaurantServiceApplication" />
+-        <item itemvalue="Application.CustomersapiserviceApplication" />
+         <item itemvalue="Application.EurekaDiscoveryServerApplication" />
+-        <item itemvalue="Application.ApiGateawayApplication" />
+         <item itemvalue="Application.UserAuthenticationServiceApplication" />
++        <item itemvalue="Application.CustomersapiserviceApplication" />
++        <item itemvalue="Application.RestaurantServiceApplication" />
++        <item itemvalue="Application.ApiGateawayApplication" />
+       </list>
+     </recent_temporary>
+   </component>
+Index: customersapiservice/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n\txsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\r\n\t<modelVersion>4.0.0</modelVersion>\r\n\t<parent>\r\n\t\t<groupId>org.example</groupId>\r\n\t\t<artifactId>FoodieApp</artifactId>\r\n\t\t<version>1.0-SNAPSHOT</version>\r\n\t</parent>\r\n\t<groupId>com.bej</groupId>\r\n\t<artifactId>customersapiservice</artifactId>\r\n\t<version>0.0.1-SNAPSHOT</version>\r\n\t<name>customersapiservice</name>\r\n\t<description>Customer microservice</description>\r\n\t<properties>\r\n\t\t<java.version>17</java.version>\r\n\t\t<spring-cloud.version>2023.0.2</spring-cloud.version>\r\n\t</properties>\r\n\t<dependencies>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.cloud</groupId>\r\n\t\t\t<artifactId>spring-cloud-starter-openfeign</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-data-mongodb</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-web</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>io.jsonwebtoken</groupId>\r\n\t\t\t<artifactId>jjwt</artifactId>\r\n\t\t\t<version>0.9.1</version>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.cloud</groupId>\r\n\t\t\t<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>\r\n\t\t</dependency>\r\n\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t<optional>true</optional>\r\n\t\t</dependency>\r\n\r\n\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-mail</artifactId>\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>com.sun.mail</groupId>\r\n\t\t\t<artifactId>jakarta.mail</artifactId>\r\n\t\t\t<version>1.6.7</version> <!-- or the latest version -->\r\n\t\t</dependency>\r\n\t\t<dependency>\r\n\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t<artifactId>spring-boot-starter-test</artifactId>\r\n\t\t\t<scope>test</scope>\r\n\t\t</dependency>\r\n\t</dependencies>\r\n\t<dependencyManagement>\r\n\t\t<dependencies>\r\n\t\t\t<dependency>\r\n\t\t\t\t<groupId>org.springframework.cloud</groupId>\r\n\t\t\t\t<artifactId>spring-cloud-dependencies</artifactId>\r\n\t\t\t\t<version>${spring-cloud.version}</version>\r\n\t\t\t\t<type>pom</type>\r\n\t\t\t\t<scope>import</scope>\r\n\t\t\t</dependency>\r\n\t\t</dependencies>\r\n\t</dependencyManagement>\r\n\r\n\t<build>\r\n\t\t<plugins>\r\n\t\t\t<plugin>\r\n\t\t\t\t<groupId>org.springframework.boot</groupId>\r\n\t\t\t\t<artifactId>spring-boot-maven-plugin</artifactId>\r\n\t\t\t\t<configuration>\r\n\t\t\t\t\t<excludes>\r\n\t\t\t\t\t\t<exclude>\r\n\t\t\t\t\t\t\t<groupId>org.projectlombok</groupId>\r\n\t\t\t\t\t\t\t<artifactId>lombok</artifactId>\r\n\t\t\t\t\t\t</exclude>\r\n\t\t\t\t\t</excludes>\r\n\t\t\t\t</configuration>\r\n\t\t\t</plugin>\r\n\t\t</plugins>\r\n\t</build>\r\n\r\n</project>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/customersapiservice/pom.xml b/customersapiservice/pom.xml
+--- a/customersapiservice/pom.xml	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/customersapiservice/pom.xml	(date 1718132815010)
+@@ -51,11 +51,6 @@
+ 			<artifactId>spring-boot-starter-mail</artifactId>
+ 		</dependency>
+ 		<dependency>
+-			<groupId>com.sun.mail</groupId>
+-			<artifactId>jakarta.mail</artifactId>
+-			<version>1.6.7</version> <!-- or the latest version -->
+-		</dependency>
+-		<dependency>
+ 			<groupId>org.springframework.boot</groupId>
+ 			<artifactId>spring-boot-starter-test</artifactId>
+ 			<scope>test</scope>
+Index: ../FrontEnd/DishDash/src/app/Components/login/login.component.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><div class=\" header flex justify-content-between align-items\">\r\n  <button mat-icon-button class=\"close-button\" (click)=\"closeDialoge()\">\r\n    <mat-icon>close</mat-icon>\r\n  </button>\r\n</div>\r\n\r\n\r\n<!-- <div mat-dialog-content> -->\r\n\r\n<div class=\"loginform p-5\">\r\n  <form #loginform = \"ngForm\" ngNativeValidate (ngSubmit)=\"loginUser()\">\r\n\r\n    <div *ngIf=\"errorMessage\" class=\"alert alert-danger\">{{errorMessage}}</div>\r\n    <!-- Email input -->\r\n    <div data-mdb-input-init class=\"form-outline mb-4\">\r\n      <label class=\"form-label\" for=\"email\">Email address</label>\r\n      <input\r\n        type=\"email\"\r\n        id=\"email\"\r\n        class=\"form-control\"\r\n        name=\"customerEmail\"\r\n        [(ngModel)]=\"userlogin.customerEmail\"\r\n        #customerEmail=\"ngModel\"\r\n        required\r\n      />\r\n    \r\n    </div>\r\n\r\n    <!-- Password input -->\r\n    <div data-mdb-input-init class=\"form-outline mb-4\">\r\n      <label class=\"form-label\" for=\"password\">Password</label>\r\n      <input\r\n        type=\"password\"\r\n        id=\"password\"\r\n        class=\"form-control\"\r\n        name=\"customerPassword\"\r\n        [(ngModel)]=\"userlogin.customerPassword\"\r\n        #customerPassword=\"ngModel\"\r\n        required\r\n      />\r\n   \r\n    </div>\r\n\r\n    <div class=\"button\">\r\n      <!-- Submit button -->\r\n      <button\r\n        type=\"submit\"\r\n        class=\"btn btn-primary btn-block mb-4\"\r\n        [disabled]=\"loginform.invalid\"\r\n      >\r\n        Sign in\r\n      </button>\r\n\r\n    </div>\r\n\r\n    <!-- Register buttons -->\r\n    <div class=\"text-center\">\r\n      <p>Not a member? <a routerLink=\"/register\" (click)=\"closeDialoge()\">Register</a></p>\r\n    </div>\r\n  </form>\r\n</div>\r\n<!-- </div> -->
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/login/login.component.html b/../FrontEnd/DishDash/src/app/Components/login/login.component.html
+--- a/../FrontEnd/DishDash/src/app/Components/login/login.component.html	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/login/login.component.html	(date 1718174307357)
+@@ -53,9 +53,13 @@
+ 
+     </div>
+ 
++    <div class="spinner flex justify-content-center" *ngIf="isLoadingSpinner">
++      <mat-spinner></mat-spinner>
++    </div>
++
+     <!-- Register buttons -->
+     <div class="text-center">
+-      <p>Not a member? <a routerLink="/register" (click)="closeDialoge()">Register</a></p>
++      <p>Not a member? <a class="pointer" (click)="openRegister()">Register</a></p>
+     </div>
+   </form>
+ </div>
+Index: ../FrontEnd/DishDash/src/app/Components/login/login.component.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import { Component } from '@angular/core';\r\nimport { customerLogin } from '../../Model/customerLogin';\r\nimport { UserService } from '../../services/user.service';\r\nimport { CookieService } from 'ngx-cookie-service';\r\nimport { MatDialog, MatDialogRef } from '@angular/material/dialog';\r\nimport { LoadingService } from '../../services/loading.service';\r\n\r\n@Component({\r\n  selector: 'app-login',\r\n  templateUrl: './login.component.html',\r\n  styleUrl: './login.component.css'\r\n})\r\nexport class LoginComponent {\r\n\r\n  userlogin:customerLogin = {\r\n    customerEmail: '',\r\n    customerPassword : ''\r\n  };\r\n\r\n  customerJWT:string\r\n\r\n  errorMessage:string | null = null;\r\n  \r\n  constructor(private userService:UserService, private cookieService: CookieService, public dialog:MatDialog, public dialogRef:MatDialogRef<LoginComponent>, public loadingSevice:LoadingService\r\n  ){}\r\n\r\n  loginUser() {\r\n \r\n    this.userService.loginUser(this.userlogin).subscribe({\r\n      next:data => {\r\n      \r\n        console.log(data);\r\n        this.customerJWT = data;\r\n        this.cookieService.set(\"token\",this.customerJWT);\r\n        this.afterLogin();\r\n        this.closeDialoge();\r\n\r\n\r\n      },\r\n      error:e => {\r\n      \r\n        console.log(e);\r\n        this.errorMessage = \"Invalid email or password. Please try again\"\r\n      }\r\n    })\r\n\r\n  }\r\n\r\n  afterLogin() {\r\n    this.userService.login(true)\r\n    \r\n  }\r\n\r\n  closeDialoge() {\r\n    this.dialogRef.close();\r\n  }\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/login/login.component.ts b/../FrontEnd/DishDash/src/app/Components/login/login.component.ts
+--- a/../FrontEnd/DishDash/src/app/Components/login/login.component.ts	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/login/login.component.ts	(date 1718174293966)
+@@ -4,6 +4,7 @@
+ import { CookieService } from 'ngx-cookie-service';
+ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+ import { LoadingService } from '../../services/loading.service';
++import { RegisterComponent } from '../register/register.component';
+ 
+ @Component({
+   selector: 'app-login',
+@@ -18,17 +19,17 @@
+   };
+ 
+   customerJWT:string
+-
+   errorMessage:string | null = null;
++  isLoadingSpinner = false;
+   
+   constructor(private userService:UserService, private cookieService: CookieService, public dialog:MatDialog, public dialogRef:MatDialogRef<LoginComponent>, public loadingSevice:LoadingService
+   ){}
+ 
+   loginUser() {
+- 
++    this.isLoadingSpinner = true;
+     this.userService.loginUser(this.userlogin).subscribe({
+       next:data => {
+-      
++    this.isLoadingSpinner = false
+         console.log(data);
+         this.customerJWT = data;
+         this.cookieService.set("token",this.customerJWT);
+@@ -38,7 +39,7 @@
+ 
+       },
+       error:e => {
+-      
++      this.isLoadingSpinner = false
+         console.log(e);
+         this.errorMessage = "Invalid email or password. Please try again"
+       }
+@@ -48,9 +49,17 @@
+ 
+   afterLogin() {
+     this.userService.login(true)
+-    
++
+   }
+ 
++  openRegister() {
++    this.dialog.open(RegisterComponent, {
++      width: "400px"
++    })
++
++    this.closeDialoge()
++  }
++
+   closeDialoge() {
+     this.dialogRef.close();
+   }
+Index: ../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><div class=\"resBox p-5\" *ngIf=\"restaurants.length !==0\">\r\n    <div class=\"headline\">\r\n        <h3>Your Favourites</h3>\r\n    </div>\r\n\r\n    <div class=\"restaurants flex gap-4 p-3 justify-content\" >\r\n\r\n       \r\n        <div class=\"card\" *ngFor=\"let restaurant of restaurants\">\r\n            <app-restaurantcard [onerestaurant] = \"restaurant\"></app-restaurantcard>\r\n        </div>\r\n    </div>\r\n\r\n</div>\r\n\r\n<div class=\"text-center p-5\" *ngIf=\"restaurants.length ==0\">\r\n<h3 class=\"text-info-emphasis\">No Favorite Restaurant</h3>\r\n<p routerLink=\"/\" class=\"pointer bg\">Go to Home Page</p>\r\n</div>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.html b/../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.html
+--- a/../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.html	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.html	(date 1718145288571)
+@@ -1,4 +1,4 @@
+-<div class="resBox p-5" *ngIf="restaurants.length !==0">
++<div class="resBox p-5" *ngIf="favRestPresent">
+     <div class="headline">
+         <h3>Your Favourites</h3>
+     </div>
+@@ -13,7 +13,7 @@
+ 
+ </div>
+ 
+-<div class="text-center p-5" *ngIf="restaurants.length ==0">
++<div class="text-center p-5" *ngIf="!favRestPresent">
+ <h3 class="text-info-emphasis">No Favorite Restaurant</h3>
+ <p routerLink="/" class="pointer bg">Go to Home Page</p>
+ </div>
+Index: UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/domain/Customer.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.UserAuthenticationService.domain;\r\n\r\nimport jakarta.persistence.Entity;\r\n\r\nimport jakarta.persistence.Id;\r\nimport jakarta.validation.constraints.Email;\r\nimport jakarta.validation.constraints.NotNull;\r\nimport jakarta.validation.constraints.Size;\r\nimport lombok.*;\r\n\r\n@Entity\r\n@Getter\r\n@Setter\r\n@NoArgsConstructor\r\n@AllArgsConstructor\r\n@ToString\r\npublic class Customer {\r\n\r\n    @Id\r\n    private String customerId;\r\n    private String customerEmail;\r\n\r\n\r\n    private String customerPassword;\r\n\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/domain/Customer.java b/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/domain/Customer.java
+--- a/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/domain/Customer.java	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/domain/Customer.java	(date 1718132822089)
+@@ -19,8 +19,6 @@
+     @Id
+     private String customerId;
+     private String customerEmail;
+-
+-
+     private String customerPassword;
+ 
+ 
+Index: ../FrontEnd/DishDash/src/app/Components/search/search.component.css
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>.main {\r\n    background-color: black;\r\n    color: white;\r\n    height: 40vh;\r\n    flex-direction: column;\r\n    /* background-image: url('../../../../Images/background.jpg'); */\r\n    background-size: cover;\r\n    /* filter: blur(5px); */\r\n\r\n}\r\n.headline span {\r\n    font-style: italic;\r\n    color: red;\r\n}\r\n\r\n.headline  h1{\r\n    font-size: 2.3em;\r\n}\r\n.searchbar {\r\n    gap: 10px;\r\n    height: 10vh;\r\n    /* border: 2px solid red; */\r\n    margin: 0;\r\n}\r\n.search, .button {\r\n    height: 80%;\r\n}\r\n.search input {\r\n    width: 50vw;\r\n    height: 100%;\r\n    padding: 10px;\r\n    border-radius: 10px;\r\n    border: 0px;\r\n}\r\n\r\n.button button {\r\n    height: 100%;\r\n    width: 100%;\r\n}\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/search/search.component.css b/../FrontEnd/DishDash/src/app/Components/search/search.component.css
+--- a/../FrontEnd/DishDash/src/app/Components/search/search.component.css	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/search/search.component.css	(date 1718174631311)
+@@ -37,4 +37,8 @@
+     height: 100%;
+     width: 100%;
+ }
++.currentLocation {
++    font-size: 14px;
++    text-align: center;
++}
+ 
+Index: ../FrontEnd/DishDash/src/app/Components/search/search.component.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><div class=\"main flex justify-content align-items\">\r\n\r\n    <div class=\"headline \">\r\n        <h1>Discover the best food & drinks in <span>{{city}}</span></h1>\r\n    </div>\r\n\r\n    <div class=\"searchbar flex align-items m-3\">\r\n\r\n        <div class=\"dropdown\">\r\n            <button class=\"btn btn-secondary dropdown-toggle flex justify-content-around align-items-center\" type=\"button\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">\r\n                <mat-icon  aria-hidden=\"false\" aria-label=\"Example home icon\" fontIcon=\"location_on\"></mat-icon> {{city}}\r\n            </button>\r\n            <ul class=\"dropdown-menu pt-0\">\r\n                <p class=\"bg-dark text-center text-white\">Available Cities</p>\r\n              <li *ngFor=\"let rest of allUniqueCities\" ><a class=\"dropdown-item\" href=\"#\" (click)=\"selectCity(rest)\">{{rest}}</a></li>\r\n            </ul>\r\n          </div>\r\n      \r\n        <div class=\"search\">\r\n            <input type=\"text\" placeholder=\"Seach for restaurant, cuisine or a dish\" [(ngModel)]=\"Search\" (input)=\"onSearch()\"></div>\r\n        <div class=\"button\">\r\n            <button class=\"btn btn-danger\" (click)=\"onSearch()\">\r\n                <mat-icon  aria-hidden=\"false\" aria-label=\"Example home icon\" fontIcon=\"search\"></mat-icon>\r\n                </button>\r\n        </div>\r\n        \r\n\r\n    </div>\r\n\r\n\r\n    \r\n\r\n\r\n</div>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/search/search.component.html b/../FrontEnd/DishDash/src/app/Components/search/search.component.html
+--- a/../FrontEnd/DishDash/src/app/Components/search/search.component.html	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/search/search.component.html	(date 1718174761949)
+@@ -11,6 +11,7 @@
+                 <mat-icon  aria-hidden="false" aria-label="Example home icon" fontIcon="location_on"></mat-icon> {{city}}
+             </button>
+             <ul class="dropdown-menu pt-0">
++                <li class="pointer currentLocation" (click)="selectCity(cityFromIp)">Current Location: {{cityFromIp}}</li>
+                 <p class="bg-dark text-center text-white">Available Cities</p>
+               <li *ngFor="let rest of allUniqueCities" ><a class="dropdown-item" href="#" (click)="selectCity(rest)">{{rest}}</a></li>
+             </ul>
+Index: UserAuthenticationService/src/main/resources/application.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>spring.application.name=UserAuthenticationService\r\n\r\nserver.port = 8081\r\n\r\nspring.datasource.url=jdbc:mysql://localhost:3306/CapstoneCustomer\r\nspring.datasource.username=root\r\nspring.datasource.password=root@123\r\nspring.jpa.hibernate.ddl-auto=update\r\nspring.jpa.show-sql=true\r\n\r\neureka.client.register-with-eureka=true\r\neureka.client.fetch-registry=true\r\nlogging.level.org.springframework=info\r\nlogging.level.com.example.UserAuthenticationService=debug\r\nlogging.pattern.console=%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>ISO-8859-1
+===================================================================
+diff --git a/UserAuthenticationService/src/main/resources/application.properties b/UserAuthenticationService/src/main/resources/application.properties
+--- a/UserAuthenticationService/src/main/resources/application.properties	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/UserAuthenticationService/src/main/resources/application.properties	(date 1718132815166)
+@@ -4,7 +4,7 @@
+ 
+ spring.datasource.url=jdbc:mysql://localhost:3306/CapstoneCustomer
+ spring.datasource.username=root
+-spring.datasource.password=root@123
++spring.datasource.password=Rockstar@123*
+ spring.jpa.hibernate.ddl-auto=update
+ spring.jpa.show-sql=true
+ 
+Index: ../FrontEnd/DishDash/src/app/app-routing.module.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import { NgModule } from '@angular/core';\r\nimport { RouterModule, Routes } from '@angular/router';\r\nimport { NavigationComponent } from './Components/navigation/navigation.component';\r\nimport { PagenotfoundComponent } from './Components/pagenotfound/pagenotfound.component';\r\nimport { RestaurantviewComponent } from './Components/restaurantview/restaurantview.component';\r\nimport { HomepageComponent } from './Components/homepage/homepage.component';\r\nimport { LoginComponent } from './Components/login/login.component';\r\nimport { RegisterComponent } from './Components/register/register.component';\r\nimport { CutomerfavouriteComponent } from './Components/cutomerfavourite/cutomerfavourite.component';\r\nimport { ProfileComponent } from './Components/profile/profile.component';\r\n\r\nconst routes: Routes = [\r\n{path:'', component: HomepageComponent},\r\n{path:'home', component: HomepageComponent},\r\n{path:'login', component: LoginComponent},\r\n{path:'register', component: RegisterComponent},\r\n{path:'customer/profile', component:ProfileComponent},\r\n{path:'customer/favourites', component: CutomerfavouriteComponent},\r\n{path:':city/restaurants/:resid', component: RestaurantviewComponent},\r\n{path:'**', component: PagenotfoundComponent}\r\n\r\n];\r\n\r\n@NgModule({\r\n  imports: [RouterModule.forRoot(routes)],\r\n  exports: [RouterModule]\r\n})\r\nexport class AppRoutingModule { }\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/app-routing.module.ts b/../FrontEnd/DishDash/src/app/app-routing.module.ts
+--- a/../FrontEnd/DishDash/src/app/app-routing.module.ts	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/app-routing.module.ts	(date 1718146120245)
+@@ -12,8 +12,6 @@
+ const routes: Routes = [
+ {path:'', component: HomepageComponent},
+ {path:'home', component: HomepageComponent},
+-{path:'login', component: LoginComponent},
+-{path:'register', component: RegisterComponent},
+ {path:'customer/profile', component:ProfileComponent},
+ {path:'customer/favourites', component: CutomerfavouriteComponent},
+ {path:':city/restaurants/:resid', component: RestaurantviewComponent},
+Index: ../FrontEnd/DishDash/src/app/Components/search/search.component.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import { Component, OnInit } from '@angular/core';\r\nimport { RestaurantService } from '../../services/restaurant.service';\r\nimport { IpLocationService } from '../../services/ip-location.service';\r\nimport { restaurant } from '../../Model/restaurant';\r\nimport { LoadingService } from '../../services/loading.service';\r\n\r\n@Component({\r\n  selector: 'app-search',\r\n  templateUrl: './search.component.html',\r\n  styleUrl: './search.component.css'\r\n})\r\nexport class SearchComponent implements OnInit {\r\n\r\n  city:string;\r\n  Search:string= '';\r\n  restaurants:restaurant[];\r\n  allUniqueCities = new Set();\r\n  fliterRestaurants:restaurant[];\r\n  filterWithSearch:restaurant[];\r\n\r\n  constructor(private resService:RestaurantService, private ipService:IpLocationService, private loadingService:LoadingService ) {}\r\n  ngOnInit(): void {\r\n\r\n    this.ipService.getIpLocation().subscribe({\r\n      next:data => {\r\n        this.city = data.city\r\n        this.updateCity(this.city)\r\n\r\n        this.resService.fetchAllRestaurants().subscribe({\r\n          next:data => {\r\n            this.restaurants = data\r\n            for( let rest of this.restaurants) {\r\n              this.allUniqueCities.add(rest.resCity);\r\n            }\r\n          }\r\n        })\r\n       \r\n        this.resService.fetchRestaurantsByCity(this.city).subscribe({\r\n          next:data => {\r\n            this.fliterRestaurants = data\r\n            this.resService.getFilteredRestaurantList(this.fliterRestaurants);\r\n          \r\n          },\r\n          error:e => {\r\n            console.log(e);\r\n          }\r\n        })\r\n      }\r\n    })\r\n  \r\n   \r\n  }\r\n\r\n  updateCity(city:string) {\r\n    this.resService.updateCity(city);\r\n\r\n  }\r\n  selectCity(city:any) {\r\n    this.city = city;\r\n    this.updateCity(this.city);\r\n    \r\n    this.resService.fetchRestaurantsByCity(this.city).subscribe({\r\n      next:data => {\r\n        this.fliterRestaurants = data\r\n        this.sendFilteredData(this.fliterRestaurants);\r\n      }\r\n    })\r\n\r\n  }\r\n\r\n  sendFilteredData(rest:restaurant[]) {\r\n    this.resService.getFilteredRestaurantList(rest);\r\n  }\r\n\r\n  onSearch(){\r\n\r\n    let tempRest: restaurant[] = this.fliterRestaurants.filter((value) => \r\n      value.resName.toLowerCase().includes(this.Search.toLowerCase())\r\n    );\r\n\r\n    this.filterWithSearch = tempRest;\r\n    this.sendFilteredData(this.filterWithSearch);\r\n    \r\n  }\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/search/search.component.ts b/../FrontEnd/DishDash/src/app/Components/search/search.component.ts
+--- a/../FrontEnd/DishDash/src/app/Components/search/search.component.ts	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/search/search.component.ts	(date 1718175167862)
+@@ -10,7 +10,7 @@
+   styleUrl: './search.component.css'
+ })
+ export class SearchComponent implements OnInit {
+-
++  cityFromIp:string=''
+   city:string;
+   Search:string= '';
+   restaurants:restaurant[];
+@@ -24,6 +24,7 @@
+     this.ipService.getIpLocation().subscribe({
+       next:data => {
+         this.city = data.city
++        this.cityFromIp =data.city
+         this.updateCity(this.city)
+ 
+         this.resService.fetchAllRestaurants().subscribe({
+@@ -43,6 +44,8 @@
+           },
+           error:e => {
+             console.log(e);
++            // console.log("No such city")
++            this.resService.getFilteredRestaurantList(this.fliterRestaurants);
+           }
+         })
+       }
+@@ -63,6 +66,12 @@
+       next:data => {
+         this.fliterRestaurants = data
+         this.sendFilteredData(this.fliterRestaurants);
++      },
++
++      error: e => {
++        console.log("No Restaurant In This City");
++        this.fliterRestaurants = null
++        this.sendFilteredData(this.fliterRestaurants);
+       }
+     })
+ 
+Index: ../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><div class=\"nav flex justify-content align-items \">\r\n    <div class=\"left\">\r\n        <img src=\"https://via.placeholder.com/150x40\" alt=\"Placeholder Image\" class=\"logo\" routerLink=\"/\">\r\n    </div>\r\n\r\n    <div class=\"right\">\r\n\r\n        <div class=\"logout flex justify-center align-items bg-white border-black gap-1\" *ngIf=\"isLoggedIn\">\r\n            <div class=\"profile\">\r\n                <img [src]=\"activeCustomer.customerProfilePic\" alt=\"\">\r\n            </div>\r\n            <div class=\"name\">{{activeCustomer.customerName.split(\" \")[0]}}</div>\r\n            <div class=\"dropdown\">\r\n                <button class=\"dropdown-toggle border-0 drop\" type=\"button\" data-bs-toggle=\"dropdown\" title=\"dropbutton\" data-bs-offset=\"0,10\">\r\n                </button>\r\n                <ul class=\"dropdown-menu\">\r\n                  <li><a class=\"dropdown-item pointer\" routerLink=\"customer/profile\">Profile</a></li>\r\n                  <li><a class=\"dropdown-item pointer\" routerLink=\"customer/favourites\">Favorites</a></li>\r\n                  <li><a class=\"dropdown-item pointer\" (click)=\"logout()\">Logout</a></li>\r\n                </ul>\r\n              </div>\r\n\r\n        </div>\r\n\r\n        <div class=\"login flex gap-md-4\" *ngIf=\"!isLoggedIn\">\r\n\r\n            <div class=\"Signup flex gap-2\">\r\n                <mat-icon  aria-hidden=\"false\" aria-label=\"Example home icon\" fontIcon=\"person\"></mat-icon> \r\n            <span (click)=\"openSignupDialog('3000ms', '1500ms')\" class=\"fw-bold pointer\">Register</span> \r\n                \r\n            </div>\r\n\r\n            <div class=\"login flex gap-2\">\r\n                <mat-icon  aria-hidden=\"false\" aria-label=\"Example home icon\" fontIcon=\"login\"></mat-icon> \r\n            <span (click)=\"openLoginDialog('3000ms', '1500ms')\" class=\"fw-bold pointer\">Log In</span> \r\n                \r\n            </div>\r\n            \r\n        </div>\r\n    </div>\r\n</div>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.html b/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.html
+--- a/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.html	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.html	(date 1718135907015)
+@@ -7,7 +7,7 @@
+ 
+         <div class="logout flex justify-center align-items bg-white border-black gap-1" *ngIf="isLoggedIn">
+             <div class="profile">
+-                <img [src]="activeCustomer.customerProfilePic" alt="">
++                <img src="https://via.placeholder.com/40x40 "alt="Profile">
+             </div>
+             <div class="name">{{activeCustomer.customerName.split(" ")[0]}}</div>
+             <div class="dropdown">
+Index: ../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import { Component, OnInit } from '@angular/core';\r\nimport { CookieService } from 'ngx-cookie-service';\r\nimport { UserService } from '../../services/user.service';\r\nimport { MatDialog } from '@angular/material/dialog';\r\nimport { LoginComponent } from '../login/login.component';\r\nimport { customer } from '../../Model/customer';\r\nimport { RegisterComponent } from '../register/register.component';\r\n\r\n@Component({\r\n  selector: 'app-navbar',\r\n  templateUrl: './navbar.component.html',\r\n  styleUrl: './navbar.component.css'\r\n})\r\nexport class NavbarComponent implements OnInit {\r\n\r\n  activeCustomer:customer;\r\n  customerJwt:string;\r\n\r\n  constructor(private cookieService:CookieService, private userService:UserService, public dialog:MatDialog){}\r\n  isLoggedIn:boolean = false;\r\n\r\n  ngOnInit(): void {\r\n\r\n    if(this.cookieService.check(\"token\")) {\r\n      this.isLoggedIn = true\r\n      this.customerJwt = this.cookieService.get(\"token\")\r\n      console.log(\"Jwt: \"+this.customerJwt);\r\n      this.fetchActiveCustomer();\r\n    }\r\n\r\n    this.userService.logInSubject.subscribe({\r\n      next:data => {\r\n        this.isLoggedIn = data;\r\n        this.customerJwt = this.cookieService.get(\"token\")\r\n        this.fetchActiveCustomer();\r\n      }\r\n    })\r\n  }\r\n\r\n  logout() {\r\n    this.cookieService.delete(\"token\");\r\n    this.isLoggedIn=false;\r\n  }\r\n\r\n  openLoginDialog(enterAnimationDuration: string, exitAnimationDuration: string):void {\r\n    this.dialog.open(LoginComponent, {\r\n      width: \"400px\"\r\n    })\r\n  }\r\n\r\n  openSignupDialog(enterAnimationDuration: string, exitAnimationDuration: string):void {\r\n    this.dialog.open(RegisterComponent, {\r\n      width: \"400px\"\r\n    })\r\n  }\r\n\r\n  fetchActiveCustomer() {\r\n    console.log(\"Fetch called\")\r\n    console.log(\"Inside fetc jwt :\" +this.customerJwt);\r\n    this.userService.fetchCustomerByJwt(this.customerJwt).subscribe({\r\n      next:data => {\r\n        this.activeCustomer = data\r\n        console.log(data);\r\n      },\r\n      error:e => {\r\n        console.log(e);\r\n\r\n      }\r\n    })\r\n  }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.ts b/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.ts
+--- a/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.ts	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.ts	(date 1718142719308)
+@@ -22,10 +22,11 @@
+   ngOnInit(): void {
+ 
+     if(this.cookieService.check("token")) {
+-      this.isLoggedIn = true
++    
+       this.customerJwt = this.cookieService.get("token")
+       console.log("Jwt: "+this.customerJwt);
+       this.fetchActiveCustomer();
++      
+     }
+ 
+     this.userService.logInSubject.subscribe({
+@@ -55,12 +56,14 @@
+   }
+ 
+   fetchActiveCustomer() {
+-    console.log("Fetch called")
+-    console.log("Inside fetc jwt :" +this.customerJwt);
++   
+     this.userService.fetchCustomerByJwt(this.customerJwt).subscribe({
+       next:data => {
++    
+         this.activeCustomer = data
+-        console.log(data);
++        this.isLoggedIn = true
++        console.log(data)
++        
+       },
+       error:e => {
+         console.log(e);
+Index: ../FrontEnd/DishDash/src/app/Components/restaurant/restaurant.component.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><div class=\"resBox p-5\" *ngIf=\"restaurants.length !==0\">\r\n    <div class=\"headline\">\r\n        <h3>Best Restaurant In {{city}}</h3>\r\n    </div>\r\n\r\n    <!-- <app-spinner *ngIf=\"loadingService.getSpinnerVisible()\"></app-spinner> -->\r\n\r\n    <div class=\"restaurants flex gap-4 p-3 justify-content\" >\r\n\r\n       \r\n        <div class=\"card\" *ngFor=\"let restaurant of restaurants\">\r\n            <app-restaurantcard [onerestaurant] = \"restaurant\"></app-restaurantcard>\r\n        </div>\r\n    </div>\r\n\r\n    <!-- <div class=\"text-center\" *ngIf=\"restaurants.length == 0 || restaurants == undefined\">\r\n    <h1>No Restaurant In Your City</h1></div> -->\r\n</div>\r\n\r\n<div class=\"text-center p-5\" *ngIf=\"restaurants.length ==0\">\r\n<h3 class=\"text-info-emphasis\">Sorry, No Restaurant In Your City</h3>\r\n<p>We are working hard to brin dishdash to your city</p>\r\n</div>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/restaurant/restaurant.component.html b/../FrontEnd/DishDash/src/app/Components/restaurant/restaurant.component.html
+--- a/../FrontEnd/DishDash/src/app/Components/restaurant/restaurant.component.html	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/restaurant/restaurant.component.html	(date 1718174212786)
+@@ -17,7 +17,10 @@
+     <h1>No Restaurant In Your City</h1></div> -->
+ </div>
+ 
+-<div class="text-center p-5" *ngIf="restaurants.length ==0">
++<div class="text-center p-5" *ngIf="noRestuarant">
+ <h3 class="text-info-emphasis">Sorry, No Restaurant In Your City</h3>
+ <p>We are working hard to brin dishdash to your city</p>
+ </div>
++<div class="spinner flex justify-content-center " *ngIf="spinnerVisible">
++    <mat-spinner ></mat-spinner>
++</div>
+Index: ../FrontEnd/DishDash/src/app/Components/restaurant/restaurant.component.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import { Component, OnInit } from '@angular/core';\r\nimport { restaurant } from '../../Model/restaurant';\r\nimport { RestaurantService } from '../../services/restaurant.service';\r\nimport { LoadingService } from '../../services/loading.service';\r\n\r\n@Component({\r\n  selector: 'app-restaurant',\r\n  templateUrl: './restaurant.component.html',\r\n  styleUrl: './restaurant.component.css'\r\n})\r\nexport class RestaurantComponent implements OnInit {\r\n\r\n  city:string;\r\n  restaurants:restaurant[] = [];\r\n\r\n  constructor(private resService:RestaurantService, public loadingService:LoadingService) {}\r\n\r\n  ngOnInit(): void {\r\n    this.resService.cityEmiter.subscribe({\r\n      next:data => {\r\n        this.city = data\r\n\r\n  \r\n    this.resService.restaurantsEmitter.subscribe({\r\n      next:data => {\r\n        console.log(data);\r\n        \r\n        this.restaurants = data\r\n      }\r\n    })\r\n\r\n\r\n\r\n      }\r\n    })\r\n    \r\n  }\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/restaurant/restaurant.component.ts b/../FrontEnd/DishDash/src/app/Components/restaurant/restaurant.component.ts
+--- a/../FrontEnd/DishDash/src/app/Components/restaurant/restaurant.component.ts	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/restaurant/restaurant.component.ts	(date 1718175255253)
+@@ -12,24 +12,37 @@
+ 
+   city:string;
+   restaurants:restaurant[] = [];
++  spinnerVisible:boolean = false;
++  noRestuarant:boolean = false;
+ 
+-  constructor(private resService:RestaurantService, public loadingService:LoadingService) {}
++  constructor(private resService:RestaurantService) {}
+ 
+   ngOnInit(): void {
+     this.resService.cityEmiter.subscribe({
+       next:data => {
+         this.city = data
+ 
+-  
++  this.spinnerVisible = true
+     this.resService.restaurantsEmitter.subscribe({
+       next:data => {
+         console.log(data);
+-        
+-        this.restaurants = data
++        if(data) {
++          this.restaurants = data
++          this.noRestuarant=false
++          console.log("happening something")
++        }
++        else {
++          this.noRestuarant = true
++          this.restaurants=[]
++        }
++    this.spinnerVisible = false
++    
++      },
++      error:e => {
++        console.log("Not received anything")
++        this.spinnerVisible = false
+       }
+     })
+-
+-
+ 
+       }
+     })
+Index: ../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.css
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.css b/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.css
+--- a/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.css	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.css	(date 1718132821979)
+@@ -1,0 +1,3 @@
++.close-button {
++    margin: 10px 15px auto auto;
++    }
+Index: ../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import { Dialog } from '@angular/cdk/dialog';\r\nimport { Component } from '@angular/core';\r\nimport { LoginComponent } from '../login/login.component';\r\n\r\n@Component({\r\n  selector: 'app-loginalert',\r\n  templateUrl: './loginalert.component.html',\r\n  styleUrl: './loginalert.component.css'\r\n})\r\nexport class LoginalertComponent {\r\n  constructor(private dialog:Dialog){}\r\n\r\n  openLoginDialog(){\r\n    this.dialog.open(LoginComponent);\r\n  }\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.ts b/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.ts
+--- a/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.ts	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/loginalert/loginalert.component.ts	(date 1718132822003)
+@@ -1,6 +1,7 @@
+ import { Dialog } from '@angular/cdk/dialog';
+ import { Component } from '@angular/core';
+ import { LoginComponent } from '../login/login.component';
++import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+ 
+ @Component({
+   selector: 'app-loginalert',
+@@ -8,9 +9,14 @@
+   styleUrl: './loginalert.component.css'
+ })
+ export class LoginalertComponent {
+-  constructor(private dialog:Dialog){}
++  constructor(private dialog:MatDialog, public dialogRef:MatDialogRef<LoginalertComponent>){}
++
++  closeDialog(){
++    this.dialogRef.close();
++  }
+ 
+   openLoginDialog(){
++    this.closeDialog();
+     this.dialog.open(LoginComponent);
+   }
+ 
+Index: ../FrontEnd/DishDash/src/app/services/user.service.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import { HttpClient, HttpHeaders } from '@angular/common/http';\r\nimport { Injectable } from '@angular/core';\r\nimport { customerLogin } from '../Model/customerLogin';\r\nimport { Observable, Subject } from 'rxjs';\r\nimport { customer } from '../Model/customer';\r\nimport { restaurant } from '../Model/restaurant';\r\n\r\n@Injectable({\r\n  providedIn: 'root'\r\n})\r\nexport class UserService {\r\n\r\n  loginAPIkey:string = ``;\r\n\r\n  logInSubject = new Subject<boolean>()\r\n\r\n  constructor(private http:HttpClient) { }\r\n\r\n  loginUser(data:customerLogin):Observable<string> {\r\n    return this.http.post(\"http://localhost:8081/api/v1/login\", data,  { responseType: 'text' });\r\n  }\r\n\r\n  registerUser(customer:any):Observable<any>\r\n  {\r\n    return this.http.post<any>(\"http://localhost:8083/api/v2/register\",customer);\r\n  }\r\n\r\n  fetchCustomerByJwt(Jwt:any):Observable<customer> {\r\n\r\n    const headers = new HttpHeaders({\r\n      'Authorization': `Bearer ${Jwt}` \r\n    });\r\n    console.log(headers);\r\n\r\n    return this.http.get<customer>('http://localhost:8083/api/v2/customers/eachcustomer',{ headers });\r\n  }\r\n\r\n  fetchCustomerFavRestaurants(customerId:string):Observable<string> {\r\n    return this.http.get<string>(\"url\")\r\n  }\r\n\r\n  login(isLoggedIn:boolean) {\r\n    this.logInSubject.next(isLoggedIn);\r\n  }\r\n\r\n  fetchCustomerFavByJwt(Jwt:any):Observable<Array<string>> {\r\n\r\n    const headers = new HttpHeaders({\r\n      'Authorization': `Bearer ${Jwt}` \r\n    });\r\n    console.log(headers);\r\n\r\n    return this.http.get<Array<string>>('http://localhost:8083/api/v2/customers/eachcustomer',{ headers });\r\n  }\r\n\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/services/user.service.ts b/../FrontEnd/DishDash/src/app/services/user.service.ts
+--- a/../FrontEnd/DishDash/src/app/services/user.service.ts	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/services/user.service.ts	(date 1718144621271)
+@@ -1,7 +1,7 @@
+-import { HttpClient, HttpHeaders } from '@angular/common/http';
++import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+ import { Injectable } from '@angular/core';
+ import { customerLogin } from '../Model/customerLogin';
+-import { Observable, Subject } from 'rxjs';
++import { BehaviorSubject, Observable, Subject } from 'rxjs';
+ import { customer } from '../Model/customer';
+ import { restaurant } from '../Model/restaurant';
+ 
+@@ -14,6 +14,7 @@
+ 
+   logInSubject = new Subject<boolean>()
+ 
++
+   constructor(private http:HttpClient) { }
+ 
+   loginUser(data:customerLogin):Observable<string> {
+@@ -28,9 +29,8 @@
+   fetchCustomerByJwt(Jwt:any):Observable<customer> {
+ 
+     const headers = new HttpHeaders({
+-      'Authorization': `Bearer ${Jwt}` 
++      'Authorization': `Bearer ${Jwt}`
+     });
+-    console.log(headers);
+ 
+     return this.http.get<customer>('http://localhost:8083/api/v2/customers/eachcustomer',{ headers });
+   }
+@@ -43,15 +43,46 @@
+     this.logInSubject.next(isLoggedIn);
+   }
+ 
++  //Fetching all favs by JWT
+   fetchCustomerFavByJwt(Jwt:any):Observable<Array<string>> {
+ 
++    const headers = new HttpHeaders({
++      'Authorization': `Bearer ${Jwt}`
++    });
++
++    return this.http.get<Array<string>>('http://localhost:8083/api/v2/customers/restaurant',{ headers });
++  }
++
++
++
++
++  //Sending Customer Fav To Backend
++
++  sendFavoriteRestToCustomer(resId:string, Jwt:string): Observable<string>{
++
++    const headers = new HttpHeaders({
++      'Authorization': `Bearer ${Jwt}`
++    });
++    return this.http.put("http://localhost:8083/api/v2/customers/addfavres", resId, { headers, responseType:'text'})
++  }
++
++  //Deleting Custoemer Fav from Backedn
++  DeleteFavoriteRestFromCustomer(resId:string, Jwt:string):Observable<boolean> {
++
+     const headers = new HttpHeaders({
+-      'Authorization': `Bearer ${Jwt}` 
++      'Authorization': `Bearer ${Jwt}`
+     });
+-    console.log(headers);
++
++    const params = new HttpParams().set('resId', resId);
+ 
+-    return this.http.get<Array<string>>('http://localhost:8083/api/v2/customers/eachcustomer',{ headers });
++    const options ={
++      headers:headers,
++      params: params
++    }
++
++ return this.http.delete<boolean>("http://localhost:8082/api/v2/customers/deleterestaurant", options)
++
+   }
+-
++  
+ 
+ }
+Index: ../FrontEnd/DishDash/src/app/Components/register/register.component.css
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>form{\r\n    margin: 0 20%;\r\n    text-align: center;\r\n    border:1px solid black;\r\n    border-radius: 10px;\r\n    padding: 10px;\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/register/register.component.css b/../FrontEnd/DishDash/src/app/Components/register/register.component.css
+--- a/../FrontEnd/DishDash/src/app/Components/register/register.component.css	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/register/register.component.css	(date 1718192617334)
+@@ -1,7 +1,0 @@
+-form{
+-    margin: 0 20%;
+-    text-align: center;
+-    border:1px solid black;
+-    border-radius: 10px;
+-    padding: 10px;
+-}
+\ No newline at end of file
+Index: ../FrontEnd/DishDash/src/app/Components/register/register.component.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><!-- <p>register works!</p> -->\r\n<form [formGroup]=\"registerForm\" (ngSubmit)=\"onSubmit()\">\r\n    <div class=\"form-div\">\r\n    <!-- customerName -->\r\n    <mat-form-field color=\"primary\" appearnace=\"legacy\">\r\n        <mat-label>Your Name</mat-label>\r\n            <input matInput type=\"text\" placeholder=\"Your Name\" formControlName=\"customerName\">\r\n        <mat-error class=\"error\" *ngIf=\"registerForm.get('customerName')?.errors?.['required']\">\r\n            Name is required\r\n         </mat-error>\r\n         <mat-error calss=\"error\" *ngIf=\"registerForm.get('customerName')?.errors?.['minlength']\">\r\n            Name must have more than 2 characters.\r\n         </mat-error>\r\n         <mat-error class=\"error\" *ngIf=\"registerForm.get('customerName')?.errors?.['pattern']\">\r\n            only alphabets are allowed\r\n         </mat-error>\r\n    </mat-form-field><br>\r\n    <!-- customerEmail-->\r\n     <mat-form-field color=\"primary\" appearnace=\"legacy\">\r\n        <mat-label>Your Email</mat-label>\r\n        <input matInput type=\"email\" placeholder=\"email\" formControlName=\"customerEmail\">\r\n        <mat-error class=\"error\" *ngIf=\"registerForm.get('customerEmail')?.errors?.['required']\">\r\n            Email is required.\r\n        </mat-error>\r\n        <mat-error class=\"error\" *ngIf=\"registerForm.get('customerEmail')?.errors?.['pattern']\">\r\n            Enter valid email.\r\n        </mat-error>\r\n     </mat-form-field ><br>\r\n    <!-- customerPassword -->\r\n     <mat-form-field color=\"primary\" appearnace=\"legacy\">\r\n        <mat-label>Password</mat-label>\r\n        <input matInput type=\"password\" placeholder=\"Password\" formControlName=\"customerPassword\">\r\n        <mat-error class=\"error\" *ngIf=\"registerForm.get('customerPassword')?.errors?.['required']\">\r\n            Password is required.\r\n        </mat-error>\r\n        <mat-error class=\"error\" *ngIf=\"registerForm.get('customerPassword')?.errors?.['pattern']\">\r\n            Password should have min 8 letter password, with atleast a symbol, upper and lower case letters\r\n            and a number.\r\n         </mat-error>\r\n     </mat-form-field ><br>\r\n     <!-- confirm password -->\r\n     <mat-form-field color=\"primary\" appearnace=\"legacy\">\r\n        <mat-label>Confirm password</mat-label>\r\n        <input matInput type=\"password\" placeholder=\"confirm Password\" formControlName=\"confirmPassword\">\r\n        <span *ngIf=\"confirmPassword?.dirty ||  confirmPassword?.touched \">\r\n            <mat-error class=\"error\" *ngIf=\"confirmPassword?.errors?.['required']\">\r\n                  Confirm Password is required\r\n            </mat-error>\r\n            <mat-error *ngIf=\"registerForm?.errors?.['passwordMismatch']\">\r\n                  >Password and Confirm Password should match\r\n            </mat-error>\r\n         </span>\r\n     </mat-form-field><br> \r\n    </div>\r\n    <button mat-raised-button color=\"primary\" type=\"submit\" [disabled]=\"registerForm.invalid\">Submit</button>\r\n</form>\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/register/register.component.html b/../FrontEnd/DishDash/src/app/Components/register/register.component.html
+--- a/../FrontEnd/DishDash/src/app/Components/register/register.component.html	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/register/register.component.html	(date 1718145994045)
+@@ -1,3 +1,9 @@
++<div class=" header flex justify-content-between align-items">
++    <button mat-icon-button class="close-button" (click)="closeDialoge()">
++      <mat-icon>close</mat-icon>
++    </button>
++  </div>
++
+ <!-- <p>register works!</p> -->
+ <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+     <div class="form-div">
+Index: ../FrontEnd/DishDash/src/app/Components/register/register.component.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import { Component } from '@angular/core';\r\nimport { AbstractControl, FormBuilder, Validators } from '@angular/forms';\r\nimport { customer } from '../../Model/customer';\r\nimport { UserService } from '../../services/user.service';\r\nimport { v4 as uuidv4 } from 'uuid';\r\n\r\n@Component({\r\n  selector: 'app-register',\r\n  templateUrl: './register.component.html',\r\n  styleUrl: './register.component.css'\r\n})\r\nexport class RegisterComponent {\r\n\r\n  uniqueId:string = ''\r\n  uuidString: string = uuidv4();\r\n    constructor(private fb:FormBuilder, private userService:UserService){}\r\n\r\n\r\n    registerForm=this.fb.group({\r\n      customerId:[this.uuidString],\r\n      customerName:['',[Validators.required,Validators.minLength(3),Validators.pattern(/^[a-zA-Z ]+$/)]],\r\n      customerEmail:['',[Validators.required,Validators.pattern(/^\\S+@\\S+\\.\\S+$/)]],\r\n      customerPassword:['',[Validators.required,Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$/)]],\r\n      confirmPassword:['',[Validators.required,Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$/)]],\r\n    },{validators:this.checkPassowrdMisMatch})\r\n\r\n    get customerId()\r\n    {\r\n      return this.registerForm.get('customerId');\r\n    }\r\n    get customerName(){\r\n      return this.registerForm.get('customerName');\r\n    }\r\n\r\n    get customerEmail()\r\n    {\r\n      return this.registerForm.get('custonerEmail');\r\n    }\r\n\r\n    get customerPassword()\r\n    {\r\n      return this.registerForm.get('customerPassword');\r\n    }\r\n\r\n    get confirmPassword()\r\n    {\r\n      return this.registerForm.get('confirmPassword');\r\n    }\r\n\r\n    // get customerProfilePic()\r\n    // {\r\n    //   return this.registerForm.get('customerProfilePic');\r\n    // }\r\n\r\n    // get customerPhone()\r\n    // {\r\n    //   return this.registerForm.get('customerPhone');\r\n    // }\r\n\r\n    // get address1()\r\n    // {\r\n    //   return this.registerForm.get('customerAddress.address1');\r\n    // }\r\n    // get landmark()\r\n    // {\r\n    //   return this.registerForm.get('customerAddress.landmark');\r\n    // }\r\n    // get city()\r\n    // {\r\n    //   return this.registerForm.get('customerAddress.city');\r\n    // }\r\n    // get pinCode()\r\n    // {\r\n    //   return this.registerForm.get('customerAddress.pinCode');\r\n    // }\r\n    // get currentLocation()\r\n    // {\r\n    //   return this.registerForm.get('customerAddress.currentLocation');\r\n    // }\r\n    \r\n    onSubmit ()\r\n    {\r\n      let registerCustomer:any=this.registerForm.value as any;\r\n      console.log(registerCustomer);\r\n      this.userService.registerUser(registerCustomer).subscribe({\r\n        next:data=>{\r\n            console.log(data);\r\n        },\r\n        error:err=>{\r\n            console.log(\"Error\",err);\r\n            \r\n        }\r\n      })\r\n      \r\n    }\r\n    checkPassowrdMisMatch(c:AbstractControl)\r\n    {\r\n      const password=c.get('customerPassword');\r\n      console.log(password);\r\n      \r\n      const confirmPass=c.get('confirmPassword');\r\n      console.log(confirmPass);\r\n      if (!password?.value || !confirmPass?.value) {\r\n        return null;\r\n      }\r\n      console.log(password.value === confirmPass.value ? null : { passwordMismatch: true });\r\n      \r\n  \r\n      return password.value === confirmPass.value ? null : { passwordMismatch: true };\r\n    }\r\n}\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../FrontEnd/DishDash/src/app/Components/register/register.component.ts b/../FrontEnd/DishDash/src/app/Components/register/register.component.ts
+--- a/../FrontEnd/DishDash/src/app/Components/register/register.component.ts	(revision 83d7031eb473a8bc03576317c658b0b9c90a5f95)
++++ b/../FrontEnd/DishDash/src/app/Components/register/register.component.ts	(date 1718146062764)
+@@ -3,6 +3,7 @@
+ import { customer } from '../../Model/customer';
+ import { UserService } from '../../services/user.service';
+ import { v4 as uuidv4 } from 'uuid';
++import { MatDialogRef } from '@angular/material/dialog';
+ 
+ @Component({
+   selector: 'app-register',
+@@ -13,7 +14,7 @@
+ 
+   uniqueId:string = ''
+   uuidString: string = uuidv4();
+-    constructor(private fb:FormBuilder, private userService:UserService){}
++    constructor(private fb:FormBuilder, private userService:UserService, public dialogRef:MatDialogRef<RegisterComponent>){}
+ 
+ 
+     registerForm=this.fb.group({
+@@ -108,5 +109,9 @@
+   
+       return password.value === confirmPass.value ? null : { passwordMismatch: true };
+     }
++
++    closeDialoge(){
++this.dialogRef.close()
++    }
+ }
+ 

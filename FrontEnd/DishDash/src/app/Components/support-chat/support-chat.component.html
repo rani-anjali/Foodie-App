@@ -1,0 +1,22 @@
+<div class="chatbot-container">
+    <h6 class="chatbot-header">Your Support Assistant</h6>
+  
+    <div class="messages">
+      <div class="chat-container">
+        <p class="left chat">How can we help today?</p>
+        <div *ngFor="let msg of messages; let isFirst = first " [ngClass]="{
+            'left': msg.role === 'assistant',
+            'right': msg.role === 'user'
+          }" class="chat">
+         
+          <p [innerHTML]="msg.content" *ngIf="!isFirst"></p>
+        </div>
+      </div>
+    </div>
+  
+    <div class="querybar">
+      <input type="text" name="search" id="we" placeholder="Type Anything" [(ngModel)]="query" (keyup.enter)="generateMessages()" required>
+      <button (click)="generateMessages()" class="search">Send</button>
+    </div>
+  </div>
+  

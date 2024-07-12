@@ -1,0 +1,257 @@
+Index: UserAuthenticationService/src/main/resources/application.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>spring.application.name=UserAuthenticationService\r\n\r\nserver.port = 8081\r\n\r\nspring.datasource.url=jdbc:mysql://localhost:3306/CapstoneCustomer\r\nspring.datasource.username=root\r\nspring.datasource.password=root\r\nspring.jpa.hibernate.ddl-auto=update\r\nspring.jpa.show-sql=true\r\n\r\neureka.client.register-with-eureka=true\r\neureka.client.fetch-registry=true\r\nlogging.level.org.springframework=info\r\nlogging.level.com.example.UserAuthenticationService=debug\r\nlogging.pattern.console=%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>ISO-8859-1
+===================================================================
+diff --git a/UserAuthenticationService/src/main/resources/application.properties b/UserAuthenticationService/src/main/resources/application.properties
+--- a/UserAuthenticationService/src/main/resources/application.properties	(revision 6dce588bdc0b54c9f8c0043461c46296bcc13d44)
++++ b/UserAuthenticationService/src/main/resources/application.properties	(date 1718089097380)
+@@ -4,7 +4,7 @@
+ 
+ spring.datasource.url=jdbc:mysql://localhost:3306/CapstoneCustomer
+ spring.datasource.username=root
+-spring.datasource.password=root
++spring.datasource.password=Rockstar@123*
+ spring.jpa.hibernate.ddl-auto=update
+ spring.jpa.show-sql=true
+ 
+Index: customersapiservice/src/main/java/com/bej/customersapiservice/CustomersapiserviceApplication.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.bej.customersapiservice;\r\n\r\nimport com.bej.customersapiservice.filter.JwtFilter;\r\nimport org.springframework.boot.SpringApplication;\r\nimport org.springframework.boot.autoconfigure.SpringBootApplication;\r\nimport org.springframework.boot.web.servlet.FilterRegistrationBean;\r\nimport org.springframework.cloud.openfeign.EnableFeignClients;\r\nimport org.springframework.context.annotation.Bean;\r\n\r\n@SpringBootApplication\r\n@EnableFeignClients\r\npublic class CustomersapiserviceApplication {\r\n\r\n\tpublic static void main(String[] args) {\r\n\t\tSpringApplication.run(CustomersapiserviceApplication.class, args);\r\n\t}\r\n\t@Bean\r\n\tpublic FilterRegistrationBean jwtFilterBean(){\r\n\t\tFilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();\r\n\t\tfilterRegistrationBean.setFilter(new JwtFilter());\r\n\t\tfilterRegistrationBean.addUrlPatterns(\"/api/v2/customers/*\");\r\n\t\treturn filterRegistrationBean;\r\n\t}\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/customersapiservice/src/main/java/com/bej/customersapiservice/CustomersapiserviceApplication.java b/customersapiservice/src/main/java/com/bej/customersapiservice/CustomersapiserviceApplication.java
+--- a/customersapiservice/src/main/java/com/bej/customersapiservice/CustomersapiserviceApplication.java	(revision 6dce588bdc0b54c9f8c0043461c46296bcc13d44)
++++ b/customersapiservice/src/main/java/com/bej/customersapiservice/CustomersapiserviceApplication.java	(date 1718089097388)
+@@ -6,9 +6,11 @@
+ import org.springframework.boot.web.servlet.FilterRegistrationBean;
+ import org.springframework.cloud.openfeign.EnableFeignClients;
+ import org.springframework.context.annotation.Bean;
++import org.springframework.web.bind.annotation.CrossOrigin;
+ 
+ @SpringBootApplication
+ @EnableFeignClients
++@CrossOrigin
+ public class CustomersapiserviceApplication {
+ 
+ 	public static void main(String[] args) {
+Index: customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.bej.customersapiservice.services;\r\n\r\nimport com.bej.customersapiservice.domain.Customer;\r\nimport com.bej.customersapiservice.exception.CustomerAlreadyExistException;\r\nimport com.bej.customersapiservice.exception.CustomerNotFoundException;\r\n\r\nimport java.util.List;\r\n\r\npublic interface ICustomerService {\r\n\r\n    public Customer registerCustomer(Customer customer) throws CustomerAlreadyExistException;\r\n    public Customer updateCustomer(Customer customer, String customerId) throws CustomerAlreadyExistException, CustomerNotFoundException;\r\n    public String addFavoriteRestaurant(String resId,String customerId) throws CustomerNotFoundException;\r\n    public String addFavoriteDish(Object obj,String customerId) throws CustomerNotFoundException;\r\n    public List<Object> getAllFavRestaurant(String customerId);\r\n    public List<Object> getAllFavDishes(String customerId);\r\n    public Customer getCustomerById(String customerId) throws CustomerNotFoundException;\r\n    public boolean deleteFavRestaurant(String customerId,Object restName) throws CustomerNotFoundException;\r\n    public boolean deleteFavDish(String customerId,Object dish) throws CustomerNotFoundException;\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java b/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java
+--- a/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java	(revision 6dce588bdc0b54c9f8c0043461c46296bcc13d44)
++++ b/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java	(date 1718089097401)
+@@ -17,4 +17,6 @@
+     public Customer getCustomerById(String customerId) throws CustomerNotFoundException;
+     public boolean deleteFavRestaurant(String customerId,Object restName) throws CustomerNotFoundException;
+     public boolean deleteFavDish(String customerId,Object dish) throws CustomerNotFoundException;
++
++    public Customer testRegister(Customer customer);
+ }
+Index: customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.bej.customersapiservice.services;\r\n\r\nimport com.bej.customersapiservice.domain.Customer;\r\nimport com.bej.customersapiservice.exception.CustomerAlreadyExistException;\r\nimport com.bej.customersapiservice.exception.CustomerNotFoundException;\r\nimport com.bej.customersapiservice.proxy.CustomerProxy;\r\nimport com.bej.customersapiservice.respository.CustomerRepo;\r\nimport org.springframework.beans.factory.annotation.Autowired;\r\nimport org.springframework.http.ResponseEntity;\r\nimport org.springframework.stereotype.Service;\r\n\r\nimport java.util.ArrayList;\r\nimport java.util.List;\r\nimport java.util.Optional;\r\n\r\n@Service\r\npublic class ImplCustomerService implements ICustomerService {\r\n\r\n    @Autowired\r\n    private CustomerRepo customerRepo;\r\n    @Autowired\r\n    private CustomerProxy customerProxy;\r\n    @Override\r\n    public Customer registerCustomer(Customer customer) throws CustomerAlreadyExistException {\r\n        if(customerRepo.findById(customer.getCustomerId()).isPresent()) {\r\n            throw new CustomerAlreadyExistException();\r\n        }\r\n        if(customer.getCustomerFavDishes() ==  null) {\r\n            customer.setCustomerFavDishes(new ArrayList<>());\r\n        }\r\n        if(customer.getCustomerFavRestaurants() == null) {\r\n            customer.setCustomerFavRestaurants(new ArrayList<>());\r\n        }\r\n//\r\n//        customerProxy.registerCustomer(customer);\r\n//        return customerRepo.save(customer);\r\n        Customer customer1=customerRepo.save(customer);\r\n        if(!(customer1.getCustomerId().isEmpty()))\r\n        {\r\n            ResponseEntity<?> proxyResponse=customerProxy.registerCustomer(customer);\r\n            System.out.println(proxyResponse.getBody());\r\n        }\r\n        return customer1;\r\n    }\r\n\r\n    public Customer updateCustomer(Customer customer, String customerId) throws CustomerNotFoundException {\r\n        if(customerRepo.findById(customerId).isPresent()) {\r\n            return customerRepo.save(customer);\r\n        }\r\n        else {\r\n            throw new CustomerNotFoundException();\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public String addFavoriteRestaurant(String resId,String customerId) throws CustomerNotFoundException {\r\n        System.out.println(\"Inside\");\r\n        System.out.println(\"Inside Imple :\" + customerRepo.findById(customerId).get() +\"Object :\"+resId);\r\n        Customer optionalCustomer=customerRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);\r\n        if(optionalCustomer.getCustomerFavRestaurants()==null)\r\n        {\r\n            optionalCustomer.setCustomerFavRestaurants(new ArrayList<>());\r\n        }\r\n\r\n        List<Object> favList = optionalCustomer.getCustomerFavRestaurants();\r\n        favList.add(resId);\r\n        customerRepo.save(optionalCustomer);\r\n        return \"Favourite Restaurant added\";\r\n    }\r\n\r\n    @Override\r\n    public String addFavoriteDish(Object obj, String customerId) throws CustomerNotFoundException {\r\n        Customer customer= customerRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);\r\n\r\n        if (customer.getCustomerFavDishes() == null) {\r\n            customer.setCustomerFavDishes(new ArrayList<>());\r\n        }\r\n\r\n        List<Object> favDishList = customer.getCustomerFavDishes();\r\n        favDishList.add(obj);\r\n        customerRepo.save(customer);\r\n        return \"Dish added to your favorites...\";\r\n\r\n    }\r\n\r\n    @Override\r\n    public List<Object> getAllFavRestaurant(String customerId) {\r\n\r\n        Optional<Customer> restCustomer = customerRepo.findById(customerId);\r\n        System.out.println(restCustomer.get());\r\n        return restCustomer.get().getCustomerFavRestaurants();\r\n    }\r\n\r\n    @Override\r\n    public List<Object> getAllFavDishes(String customerId) {\r\n        Optional<Customer> restCustomer = customerRepo.findById(customerId);\r\n        System.out.println(restCustomer.get());\r\n        return restCustomer.get().getCustomerFavDishes();\r\n    }\r\n\r\n    @Override\r\n    public Customer getCustomerById(String customerId) throws CustomerNotFoundException {\r\n        return customerRepo.findById(customerId).orElseThrow(CustomerNotFoundException::new);\r\n    }\r\n\r\n    @Override\r\n    public boolean deleteFavRestaurant(String customerId,Object resId) throws CustomerNotFoundException {\r\n        boolean isDeleted=false;\r\n        Optional<Customer> optionalCustomer=customerRepo.findById(customerId);\r\n\r\n        if(optionalCustomer.isEmpty())\r\n        {\r\n            throw new CustomerNotFoundException();\r\n        }\r\n        Customer customer=optionalCustomer.get();\r\n        List<Object> favRestList= customer.getCustomerFavRestaurants();\r\n        favRestList.remove(resId);\r\n        customer.setCustomerFavRestaurants(favRestList);\r\n        customerRepo.save(customer);\r\n        isDeleted=true;\r\n\r\n        return isDeleted;\r\n    }\r\n    public boolean deleteFavDish(String customerId,Object dish) throws CustomerNotFoundException {\r\n        boolean isDeleted=false;\r\n        Optional<Customer> optionalCustomer=customerRepo.findById(customerId);\r\n\r\n        if(optionalCustomer.isEmpty())\r\n        {\r\n            throw new CustomerNotFoundException();\r\n        }\r\n        Customer customer=optionalCustomer.get();\r\n\r\n        List<Object> favList = customer.getCustomerFavDishes();\r\n        favList.remove(dish);\r\n        customer.setCustomerFavDishes(favList);\r\n        customerRepo.save(customer);\r\n        isDeleted=true;\r\n\r\n        return isDeleted;\r\n    }\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java b/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java
+--- a/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java	(revision 6dce588bdc0b54c9f8c0043461c46296bcc13d44)
++++ b/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java	(date 1718089097404)
+@@ -20,6 +20,11 @@
+     private CustomerRepo customerRepo;
+     @Autowired
+     private CustomerProxy customerProxy;
++
++    @Override
++    public Customer testRegister(Customer customer){
++        return this.customerRepo.save(customer);
++    }
+     @Override
+     public Customer registerCustomer(Customer customer) throws CustomerAlreadyExistException {
+         if(customerRepo.findById(customer.getCustomerId()).isPresent()) {
+@@ -31,9 +36,7 @@
+         if(customer.getCustomerFavRestaurants() == null) {
+             customer.setCustomerFavRestaurants(new ArrayList<>());
+         }
+-//
+-//        customerProxy.registerCustomer(customer);
+-//        return customerRepo.save(customer);
++
+         Customer customer1=customerRepo.save(customer);
+         if(!(customer1.getCustomerId().isEmpty()))
+         {
+Index: customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.bej.customersapiservice.controller;\r\n\r\nimport com.bej.customersapiservice.domain.Customer;\r\nimport com.bej.customersapiservice.exception.CustomerAlreadyExistException;\r\nimport com.bej.customersapiservice.exception.CustomerNotFoundException;\r\nimport com.bej.customersapiservice.services.ICustomerService;\r\nimport jakarta.servlet.http.HttpServletRequest;\r\nimport org.springframework.beans.factory.annotation.Autowired;\r\nimport org.springframework.data.annotation.Id;\r\nimport org.springframework.http.HttpStatus;\r\nimport org.springframework.http.ResponseEntity;\r\nimport org.springframework.web.bind.annotation.*;\r\n\r\n@RestController\r\n@RequestMapping(\"/api/v2\")\r\n@CrossOrigin\r\npublic class CustomerController {\r\n\r\n    @Autowired\r\n    private ICustomerService iCustomerService;\r\n\r\n    @PostMapping(\"/register\")\r\n    public ResponseEntity registerCustomer(@RequestBody Customer customer) {\r\n        try {\r\n            return new ResponseEntity(iCustomerService.registerCustomer(customer), HttpStatus.CREATED);\r\n        } catch (CustomerAlreadyExistException e) {\r\n            return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);\r\n        }\r\n    }\r\n\r\n    @PutMapping(\"/customers/update\")\r\n    public ResponseEntity updateCustomer(@RequestBody Customer customer, HttpServletRequest request) {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        try {\r\n            return new ResponseEntity(iCustomerService.updateCustomer(customer, customerId), HttpStatus.OK);\r\n        } catch (Exception e) {\r\n            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);\r\n        }\r\n    }\r\n\r\n    @PutMapping(\"/customers/addfavres\")\r\n    public ResponseEntity updateFavRest(@RequestBody String obj, HttpServletRequest request) throws CustomerNotFoundException {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.addFavoriteRestaurant(obj,customerId),HttpStatus.OK);\r\n    }\r\n\r\n    @PutMapping(\"/customers/addfavdish\")\r\n    public ResponseEntity updateFavDish(@RequestBody Object obj, HttpServletRequest request) throws CustomerNotFoundException {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.addFavoriteDish(obj,customerId),HttpStatus.OK);\r\n    }\r\n\r\n    @GetMapping(\"/customers/restaurant\")\r\n    public ResponseEntity fetchFavRest(HttpServletRequest request)\r\n    {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.getAllFavRestaurant(customerId),HttpStatus.OK);\r\n    }\r\n    @GetMapping(\"/customers/dishes\")\r\n    public ResponseEntity fetchFavDish(HttpServletRequest request)\r\n    {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.getAllFavDishes(customerId),HttpStatus.OK);\r\n    }\r\n    @GetMapping(\"/eachcustomer\")\r\n    public ResponseEntity<?> fetchByJwtToken(HttpServletRequest request) throws CustomerNotFoundException {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.getCustomerById(customerId),HttpStatus.OK);\r\n    }\r\n    @DeleteMapping(\"/customers/deletedish\")\r\n    public ResponseEntity<?> deleteFavDish(@RequestBody Object dish, HttpServletRequest request) throws CustomerNotFoundException {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.deleteFavDish(customerId,dish),HttpStatus.OK);\r\n    }\r\n    @DeleteMapping(\"/customers/deletedrestaurant/{restName}\")\r\n    public ResponseEntity<?> deleteFavRest(@RequestBody Object restName, HttpServletRequest request) throws CustomerNotFoundException {\r\n        String customerId = (String) request.getAttribute(\"customerId\");\r\n        return new ResponseEntity<>(iCustomerService.deleteFavRestaurant(customerId,restName),HttpStatus.OK);\r\n    }\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java b/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java
+--- a/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java	(revision 6dce588bdc0b54c9f8c0043461c46296bcc13d44)
++++ b/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java	(date 1718089097394)
+@@ -13,12 +13,17 @@
+ 
+ @RestController
+ @RequestMapping("/api/v2")
+-@CrossOrigin
++@CrossOrigin(origins = "http://localhost:4200")
+ public class CustomerController {
+ 
+     @Autowired
+     private ICustomerService iCustomerService;
+ 
++    @PostMapping("/registertest")
++    public ResponseEntity registerCustomertest(@RequestBody Customer customer) {
++        return new ResponseEntity(iCustomerService.testRegister(customer), HttpStatus.CREATED);
++    }
++
+     @PostMapping("/register")
+     public ResponseEntity registerCustomer(@RequestBody Customer customer) {
+         try {
+@@ -62,7 +67,7 @@
+         String customerId = (String) request.getAttribute("customerId");
+         return new ResponseEntity<>(iCustomerService.getAllFavDishes(customerId),HttpStatus.OK);
+     }
+-    @GetMapping("/eachcustomer")
++    @GetMapping("/customers/eachcustomer")
+     public ResponseEntity<?> fetchByJwtToken(HttpServletRequest request) throws CustomerNotFoundException {
+         String customerId = (String) request.getAttribute("customerId");
+         return new ResponseEntity<>(iCustomerService.getCustomerById(customerId),HttpStatus.OK);
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"9c8a6dba-7c8c-426b-ad82-e45f53e77f5c\" name=\"Changes\" comment=\"\">\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/controller/CustomerController.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/controller/CustomerController.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/services/SecurityTokenGenImpl.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/services/SecurityTokenGenImpl.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/UserAuthenticationService/src/main/resources/application.properties\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/UserAuthenticationService/src/main/resources/application.properties\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/customersapiservice/src/main/resources/application.properties\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/customersapiservice/src/main/resources/application.properties\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/../FrontEnd/DishDash/src/app/services/register.service.ts\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/../FrontEnd/DishDash/src/app/services/register.service.ts\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Interface\" />\r\n        <option value=\"Class\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$/..\" />\r\n  </component>\r\n  <component name=\"MarkdownSettingsMigration\">\r\n    <option name=\"stateVersion\" value=\"1\" />\r\n  </component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 7\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"2hRdb5bzKy99WtrSghQJjDoSedT\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\"><![CDATA[{\r\n  \"keyToString\": {\r\n    \"Application.ApiGateawayApplication.executor\": \"Run\",\r\n    \"Application.CustomersapiserviceApplication.executor\": \"Run\",\r\n    \"Application.EurekaDiscoveryServerApplication.executor\": \"Run\",\r\n    \"Application.RestaurantServiceApplication.executor\": \"Run\",\r\n    \"Application.UserAuthenticationServiceApplication.executor\": \"Run\",\r\n    \"Application.abc.executor\": \"Run\",\r\n    \"RunOnceActivity.OpenProjectViewOnStart\": \"true\",\r\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\r\n    \"git-widget-placeholder\": \"dev-v1\",\r\n    \"kotlin-language-version-configured\": \"true\",\r\n    \"last_opened_file_path\": \"C:/Emexo/bankingmanagement-api/bankingmanagement-api\",\r\n    \"settings.editor.selected.configurable\": \"preferences.pluginManager\"\r\n  }\r\n}]]></component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"CopyFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Users\\Avish Madaan\\Desktop\\NIIT\\Phase 2\\Course 14 - Capstone Project\\major-capstone-project\\FoodieApp\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunManager\" selected=\"Application.CustomersapiserviceApplication\">\r\n    <configuration name=\"ApiGateawayApplication\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"com.example.ApiGateaway.ApiGateawayApplication\" />\r\n      <module name=\"ApiGateaway\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"com.example.ApiGateaway.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"CustomersapiserviceApplication\" type=\"Application\" factoryName=\"Application\" temporary=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"com.bej.customersapiservice.CustomersapiserviceApplication\" />\r\n      <module name=\"customersapiservice\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"com.bej.customersapiservice.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"EurekaDiscoveryServerApplication\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"com.example.EurekaDiscoveryServer.EurekaDiscoveryServerApplication\" />\r\n      <module name=\"EurekaDiscoveryServer\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"com.example.EurekaDiscoveryServer.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"RestaurantServiceApplication\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"com.example.RestaurantService.RestaurantServiceApplication\" />\r\n      <module name=\"RestaurantService\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"com.example.RestaurantService.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"UserAuthenticationServiceApplication\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"MAIN_CLASS_NAME\" value=\"com.example.UserAuthenticationService.UserAuthenticationServiceApplication\" />\r\n      <module name=\"UserAuthenticationService\" />\r\n      <extension name=\"coverage\">\r\n        <pattern>\r\n          <option name=\"PATTERN\" value=\"com.example.UserAuthenticationService.*\" />\r\n          <option name=\"ENABLED\" value=\"true\" />\r\n        </pattern>\r\n      </extension>\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <list>\r\n      <item itemvalue=\"Application.RestaurantServiceApplication\" />\r\n      <item itemvalue=\"Application.ApiGateawayApplication\" />\r\n      <item itemvalue=\"Application.CustomersapiserviceApplication\" />\r\n      <item itemvalue=\"Application.EurekaDiscoveryServerApplication\" />\r\n      <item itemvalue=\"Application.UserAuthenticationServiceApplication\" />\r\n    </list>\r\n    <recent_temporary>\r\n      <list>\r\n        <item itemvalue=\"Application.CustomersapiserviceApplication\" />\r\n        <item itemvalue=\"Application.ApiGateawayApplication\" />\r\n        <item itemvalue=\"Application.UserAuthenticationServiceApplication\" />\r\n        <item itemvalue=\"Application.EurekaDiscoveryServerApplication\" />\r\n        <item itemvalue=\"Application.RestaurantServiceApplication\" />\r\n      </list>\r\n    </recent_temporary>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"9c8a6dba-7c8c-426b-ad82-e45f53e77f5c\" name=\"Changes\" comment=\"\" />\r\n      <created>1717560898011</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1717560898011</updated>\r\n    </task>\r\n    <servers />\r\n  </component>\r\n  <component name=\"XSLT-Support.FileAssociations.UIState\">\r\n    <expand />\r\n    <select />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 6dce588bdc0b54c9f8c0043461c46296bcc13d44)
++++ b/.idea/workspace.xml	(date 1718089097364)
+@@ -6,11 +6,36 @@
+   <component name="ChangeListManager">
+     <list default="true" id="9c8a6dba-7c8c-426b-ad82-e45f53e77f5c" name="Changes" comment="">
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/controller/CustomerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/controller/CustomerController.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/services/SecurityTokenGenImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/services/SecurityTokenGenImpl.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/domain/Customer.java" beforeDir="false" afterPath="$PROJECT_DIR$/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/domain/Customer.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/UserAuthenticationService/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/UserAuthenticationService/src/main/resources/application.properties" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/customersapiservice/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/customersapiservice/src/main/resources/application.properties" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/services/register.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/services/register.service.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/CustomersapiserviceApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/CustomersapiserviceApplication.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/controller/CustomerController.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/services/ICustomerService.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/customersapiservice/src/main/java/com/bej/customersapiservice/services/ImplCustomerService.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.html" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/cutomerfavourite/cutomerfavourite.component.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/footer/footer.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/footer/footer.component.html" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/loadingbar/loadingbar.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/loadingbar/loadingbar.component.html" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/loadingbar/loadingbar.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/loadingbar/loadingbar.component.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/login/login.component.css" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/login/login.component.css" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/login/login.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/login/login.component.html" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/login/login.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/login/login.component.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.html" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/navbar/navbar.component.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/navigation/navigation.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/navigation/navigation.component.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/register/register.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/register/register.component.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/restaurant/restaurant.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/restaurant/restaurant.component.html" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/restaurant/restaurant.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/restaurant/restaurant.component.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.css" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.css" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.html" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/restaurantview/restaurantview.component.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/search/search.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/Components/search/search.component.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/app-routing.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/app-routing.module.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/app.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/app.module.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/services/loading.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/services/loading.service.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/services/register.service.ts" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/services/restaurant.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/services/restaurant.service.ts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/services/user.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FrontEnd/DishDash/src/app/services/user.service.ts" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -39,28 +64,28 @@
+     <option name="hideEmptyMiddlePackages" value="true" />
+     <option name="showLibraryContents" value="true" />
+   </component>
+-  <component name="PropertiesComponent"><![CDATA[{
+-  "keyToString": {
+-    "Application.ApiGateawayApplication.executor": "Run",
+-    "Application.CustomersapiserviceApplication.executor": "Run",
+-    "Application.EurekaDiscoveryServerApplication.executor": "Run",
+-    "Application.RestaurantServiceApplication.executor": "Run",
+-    "Application.UserAuthenticationServiceApplication.executor": "Run",
+-    "Application.abc.executor": "Run",
+-    "RunOnceActivity.OpenProjectViewOnStart": "true",
+-    "RunOnceActivity.ShowReadmeOnStart": "true",
+-    "git-widget-placeholder": "dev-v1",
+-    "kotlin-language-version-configured": "true",
+-    "last_opened_file_path": "C:/Emexo/bankingmanagement-api/bankingmanagement-api",
+-    "settings.editor.selected.configurable": "preferences.pluginManager"
++  <component name="PropertiesComponent">{
++  &quot;keyToString&quot;: {
++    &quot;Application.ApiGateawayApplication.executor&quot;: &quot;Run&quot;,
++    &quot;Application.CustomersapiserviceApplication.executor&quot;: &quot;Run&quot;,
++    &quot;Application.EurekaDiscoveryServerApplication.executor&quot;: &quot;Run&quot;,
++    &quot;Application.RestaurantServiceApplication.executor&quot;: &quot;Run&quot;,
++    &quot;Application.UserAuthenticationServiceApplication.executor&quot;: &quot;Run&quot;,
++    &quot;Application.abc.executor&quot;: &quot;Run&quot;,
++    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
++    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
++    &quot;git-widget-placeholder&quot;: &quot;dev-v1&quot;,
++    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
++    &quot;last_opened_file_path&quot;: &quot;C:/Emexo/bankingmanagement-api/bankingmanagement-api&quot;,
++    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+   }
+-}]]></component>
++}</component>
+   <component name="RecentsManager">
+     <key name="CopyFile.RECENT_KEYS">
+       <recent name="C:\Users\Avish Madaan\Desktop\NIIT\Phase 2\Course 14 - Capstone Project\major-capstone-project\FoodieApp" />
+     </key>
+   </component>
+-  <component name="RunManager" selected="Application.CustomersapiserviceApplication">
++  <component name="RunManager">
+     <configuration name="ApiGateawayApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+       <option name="MAIN_CLASS_NAME" value="com.example.ApiGateaway.ApiGateawayApplication" />
+       <module name="ApiGateaway" />
+@@ -135,11 +160,11 @@
+     </list>
+     <recent_temporary>
+       <list>
++        <item itemvalue="Application.RestaurantServiceApplication" />
+         <item itemvalue="Application.CustomersapiserviceApplication" />
+         <item itemvalue="Application.ApiGateawayApplication" />
+         <item itemvalue="Application.UserAuthenticationServiceApplication" />
+         <item itemvalue="Application.EurekaDiscoveryServerApplication" />
+-        <item itemvalue="Application.RestaurantServiceApplication" />
+       </list>
+     </recent_temporary>
+   </component>
+Index: UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/domain/Customer.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.UserAuthenticationService.domain;\r\n\r\nimport jakarta.persistence.Entity;\r\n\r\nimport jakarta.persistence.Id;\r\nimport jakarta.validation.constraints.Email;\r\nimport jakarta.validation.constraints.NotNull;\r\nimport jakarta.validation.constraints.Size;\r\nimport lombok.*;\r\n\r\n@Entity\r\n@Getter\r\n@Setter\r\n@NoArgsConstructor\r\n@AllArgsConstructor\r\n@ToString\r\npublic class Customer {\r\n\r\n    @Id\r\n    private String customerId;\r\n    private String customerEmail;\r\n\r\n\r\n    private String customerPassword;\r\n\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/domain/Customer.java b/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/domain/Customer.java
+--- a/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/domain/Customer.java	(revision 6dce588bdc0b54c9f8c0043461c46296bcc13d44)
++++ b/UserAuthenticationService/src/main/java/com/example/UserAuthenticationService/domain/Customer.java	(date 1718089097373)
+@@ -19,8 +19,6 @@
+     @Id
+     private String customerId;
+     private String customerEmail;
+-
+-
+     private String customerPassword;
+ 
+ 

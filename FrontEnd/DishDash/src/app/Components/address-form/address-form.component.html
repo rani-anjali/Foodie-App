@@ -1,0 +1,53 @@
+<!-- <p>address-form works!</p> -->
+<div class="container mt-5">
+    <form [formGroup]="addressForm" (ngSubmit)="onSubmit()">
+      <!-- Address Line 1 -->
+      <div class="form-group">
+        <label for="address1" class="form-label">Address Line 1</label>
+        <input type="text" id="address1" class="form-control" formControlName="address1">
+        <mat-error class="error" *ngIf="address1?.errors?.['required']">
+          Address Line 1 is required.
+        </mat-error>
+      </div>
+      <!-- Landmark -->
+      <div class="form-group">
+        <label for="landmark" class="form-label">Landmark</label>
+        <input type="text" id="landmark" class="form-control" formControlName="landmark">
+        <mat-error class="error" *ngIf="landmark?.errors?.['required']">
+          Landmark is required.
+        </mat-error>
+      </div>
+      <!-- City -->
+      <div class="form-group">
+        <label for="city" class="form-label">City</label>
+        <input type="text" id="city" class="form-control" formControlName="city">
+        <mat-error class="error" *ngIf="city?.errors?.['required']">
+          City is required.
+        </mat-error>
+      </div>
+      <!-- Pin Code -->
+      <div class="form-group">
+        <label for="pinCode" class="form-label">Pin Code</label>
+        <input type="text" id="pinCode" class="form-control" formControlName="pinCode">
+        <mat-error class="error" *ngIf="pinCode?.errors?.['required']">
+          Pin Code is required.
+        </mat-error>
+        <mat-error class="error" *ngIf="pinCode?.errors?.['pattern']">
+          Pin Code must be 6 digits.
+        </mat-error>
+      </div>
+      <!-- Current Location -->
+      <div class="form-group">
+        <label for="currentLocation" class="form-label">Current Location</label>
+        <input type="text" id="currentLocation" class="form-control" formControlName="currentLocation">
+        <mat-error class="error" *ngIf="currentLocation?.errors?.['required']">
+          Current Location is required.
+        </mat-error>
+      </div>
+      <!-- Submit Button -->
+      <div class="form-group">
+        <button class="btn btn-dark btn-block mb-3" type="submit">Save Address</button>
+      </div>
+    </form>
+  </div>
+  

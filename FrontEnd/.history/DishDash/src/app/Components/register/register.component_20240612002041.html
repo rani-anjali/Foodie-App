@@ -1,0 +1,84 @@
+<!-- <p>register works!</p> -->
+<form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <div class="form-div">
+   <!-- customerID -->
+    <mat-form-field color="primary" appearnace="legacy">
+        <mat-label>customer Id</mat-label>
+        <input matInput type="text" placeholder="Unique Id" formControlName="customerId">
+         <mat-error class="error" *ngIf="registerForm.get('customerId')?.errors?.['required']">
+               CustomerId is required
+         </mat-error>
+         <mat-error class="error" *ngIf="registerForm.get('customerId')?.errors?.['minLength']">
+               Customer Id must me unique.
+         </mat-error>
+   </mat-form-field>
+    <br>
+    <!-- customerName -->
+    <mat-form-field color="primary" appearnace="legacy">
+        <mat-label>Your Name</mat-label>
+            <input matInput type="text" placeholder="Your Name" formControlName="customerName">
+        <mat-error class="error" *ngIf="registerForm.get('customerName')?.errors?.['required']">
+            Name is required
+         </mat-error>
+         <mat-error calss="error" *ngIf="registerForm.get('customerName')?.errors?.['minlength']">
+            Name must have more than 2 characters.
+         </mat-error>
+         <mat-error class="error" *ngIf="registerForm.get('customerName')?.errors?.['pattern']">
+            only alphabets are allowed
+         </mat-error>
+    </mat-form-field><br>
+    <!-- customerEmail-->
+     <mat-form-field color="primary" appearnace="legacy">
+        <mat-label>Your Email</mat-label>
+        <input matInput type="email" placeholder="email" formControlName="customerEmail">
+        <mat-error class="error" *ngIf="registerForm.get('customerEmail')?.errors?.['required']">
+            Email is required.
+        </mat-error>
+        <mat-error class="error" *ngIf="registerForm.get('customerEmail')?.errors?.['pattern']">
+            Enter valid email.
+        </mat-error>
+     </mat-form-field ><br>
+    <!-- customerPassword -->
+     <mat-form-field color="primary" appearnace="legacy">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" placeholder="Password" formControlName="customerPassword">
+        <mat-error class="error" *ngIf="registerForm.get('customerPassword')?.errors?.['required']">
+            Password is required.
+        </mat-error>
+        <mat-error class="error" *ngIf="registerForm.get('customerPassword')?.errors?.['pattern']">
+            Password should have min 8 letter password, with atleast a symbol, upper and lower case letters
+            and a number.
+         </mat-error>
+     </mat-form-field ><br>
+     <!-- confirm password -->
+     <mat-form-field color="primary" appearnace="legacy">
+        <mat-label>Confirm password</mat-label>
+        <input matInput type="password" placeholder="confirm Password" formControlName="confirmPassword">
+        <span *ngIf="confirmPassword?.dirty ||  confirmPassword?.touched ">
+            <mat-error class="error" *ngIf="confirmPassword?.errors?.['required']">
+                  Confirm Password is required
+            </mat-error>
+            <mat-error *ngIf="registerForm?.errors?.['passwordMismatch']">
+                  >Password and Confirm Password should match
+            </mat-error>
+         </span>
+     </mat-form-field><br>
+    <!-- customerProfilePic -->
+    
+    <input type="file" placeholder="upload picture"  formControlName="customerProfilePic">
+     <br><br>
+    <!-- customerPhone -->
+    <mat-form-field color="primary" appearnace="legacy">
+        <mat-label>contact number</mat-label>
+        <input matInput type="number" placeholder="contact number" formControlName="customerPhone">
+     </mat-form-field><br>
+    <!-- customerAddress -->
+     <!-- <div formGroupName="customerAddress">
+        <mat-form-field color="primary" appearnace="legacy">
+        <input matInput type="text">
+     </mat-form-field>
+     </div> -->
+    </div>
+    <button mat-raised-button color="primary" type="submit" [disabled]="registerForm.invalid">Submit</button>
+</form>
+

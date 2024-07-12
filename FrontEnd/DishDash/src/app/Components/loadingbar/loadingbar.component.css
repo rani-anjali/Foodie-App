@@ -1,0 +1,36 @@
+.loading-bar {
+  height: 8px; /* Adjust the height of the progress bar */
+  border-radius: 4px; /* Add rounded corners */
+  background-color: #e0e0e0; /* Set background color */
+  margin: 0 auto; /* Center the progress bar */
+  width:100%; /* Adjust the width */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+  overflow: hidden; /* Ensure the rounded corners are visible */
+  position: fixed; /* Fix the progress bar to the top */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2000; /* Ensure it stays on top of other elements */
+}
+
+.mat-progress-bar-fill::after {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(270deg, #007bff, #00d4ff); /* Add gradient color */
+  animation: move 2s linear infinite; /* Add animation */
+  opacity: 0.3; /* Add transparency */
+}
+
+@keyframes move {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}

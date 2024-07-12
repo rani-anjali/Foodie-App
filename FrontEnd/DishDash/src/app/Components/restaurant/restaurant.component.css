@@ -1,0 +1,81 @@
+.resBox {
+    background-color: #ffffff; /* White background for the restaurant box */
+    color: #333; /* Dark gray text */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+    padding: 20px;
+  }
+  
+  .restaurants {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+  }
+  
+  .spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh; /* Adjust the height as needed */
+  }
+  
+  .controls {
+    text-align: center;
+  }
+  
+  .pagination {
+    display: inline-block;
+    padding-left: 0;
+    margin: 0;
+    border-radius: 0.25rem;
+  }
+  
+  .pagination-controls {
+    display: inline-block;
+  }
+  
+  .pagination-controls .ng2-pagination li {
+    display: inline;
+    margin: 0 2px;
+  }
+  
+  .pagination-controls .ng2-pagination li a {
+    color: #007bff; /* Primary blue color */
+    padding: 0.5rem 0.75rem;
+    text-decoration: none;
+    background-color: #fff;
+    /* border: 1px solid #ddd; */
+    border-radius: 0.25rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .pagination-controls .ng2-pagination li a:hover {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+  }
+  
+  .pagination-controls .ng2-pagination .current a {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+  }
+  
+  .text-info-emphasis {
+    color: #007bff; /* Primary blue color */
+  }
+  .card {
+    border:none !Important;
+  }
+ 
+
+  
+  @media (max-width: 768px) {
+    .restaurants .card {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+  }
+  

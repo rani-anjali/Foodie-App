@@ -1,0 +1,87 @@
+
+<div class="adminbar bg-body-tertiary flex justify-content-end p-3" >
+  <div class="logout">
+    <p (click)="logout()" class="pointer fw-bold">Logout</p></div>
+</div>
+<div class="admin-view-container">
+
+    <h2 class="text-center mb-4">Admin Dashboard</h2>
+    <mat-tab-group>
+      <!-- Orders Tab -->
+      <mat-tab label="Orders">
+        <div class="orders-section">
+          <mat-table [dataSource]="allOrders" class="mat-elevation-z8">
+            <!-- Order ID Column -->
+            <ng-container matColumnDef="orderId">
+              <mat-header-cell *matHeaderCellDef> Order ID </mat-header-cell>
+              <mat-cell *matCellDef="let order"> {{order.orderId}} </mat-cell>
+            </ng-container>
+  
+            <!-- Customer ID Column -->
+            <ng-container matColumnDef="customerId">
+              <mat-header-cell *matHeaderCellDef> Customer ID </mat-header-cell>
+              <mat-cell *matCellDef="let order"> {{order.customerId}} </mat-cell>
+            </ng-container>
+  
+            <!-- Total Price Column -->
+            <ng-container matColumnDef="totalPrice">
+              <mat-header-cell *matHeaderCellDef> Total Price </mat-header-cell>
+              <mat-cell *matCellDef="let order"> Rs {{order.totalPrice}} </mat-cell>
+            </ng-container>
+  
+            <!-- Payment Method Column -->
+            <ng-container matColumnDef="paymentMethod">
+              <mat-header-cell *matHeaderCellDef> Payment Method </mat-header-cell>
+              <mat-cell *matCellDef="let order"> {{order.paymentMethod}} </mat-cell>
+            </ng-container>
+  
+            <!-- Order Timestamp Column -->
+            <ng-container matColumnDef="timeStamp">
+              <mat-header-cell *matHeaderCellDef> Date </mat-header-cell>
+              <mat-cell *matCellDef="let order"> {{order.timeStamp | date:'medium'}} </mat-cell>
+            </ng-container>
+  
+            <!-- Header and Row Definitions -->
+            <mat-header-row *matHeaderRowDef="orderDisplayedColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: orderDisplayedColumns;"></mat-row>
+          </mat-table>
+        </div>
+      </mat-tab>
+  
+      <!-- Customers Tab -->
+      <mat-tab label="Customers">
+        <div class="customers-section">
+          <mat-table [dataSource]="allCustomers" class="mat-elevation-z8">
+            <!-- Customer ID Column -->
+            <ng-container matColumnDef="customerId">
+              <mat-header-cell *matHeaderCellDef> Customer ID </mat-header-cell>
+              <mat-cell *matCellDef="let customer"> {{customer.customerId}} </mat-cell>
+            </ng-container>
+  
+            <!-- Name Column -->
+            <ng-container matColumnDef="customerName">
+              <mat-header-cell *matHeaderCellDef> Name </mat-header-cell>
+              <mat-cell *matCellDef="let customer"> {{customer.customerName}} </mat-cell>
+            </ng-container>
+  
+            <!-- Email Column -->
+            <ng-container matColumnDef="customerEmail">
+              <mat-header-cell *matHeaderCellDef> Email </mat-header-cell>
+              <mat-cell *matCellDef="let customer"> {{customer.customerEmail}} </mat-cell>
+            </ng-container>
+  
+            <!-- Phone Column -->
+            <ng-container matColumnDef="customerPhone">
+              <mat-header-cell *matHeaderCellDef> Phone </mat-header-cell>
+              <mat-cell *matCellDef="let customer"> {{customer.customerPhone}} </mat-cell>
+            </ng-container>
+  
+            <!-- Header and Row Definitions -->
+            <mat-header-row *matHeaderRowDef="customerDisplayedColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: customerDisplayedColumns;"></mat-row>
+          </mat-table>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+  

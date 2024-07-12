@@ -1,0 +1,52 @@
+<div class="loginform p-5 text-center d-flex align-items-center justify-content-center flex-column bg-light rounded shadow-sm">
+    <h3 class="mb-4">Admin Login</h3>
+    <form #loginform="ngForm" ngNativeValidate (ngSubmit)="loginUser()">
+    
+      <div *ngIf="errorMessage" class="alert alert-danger">{{errorMessage}}</div>
+    
+      <!-- Email input -->
+      <div class="form-outline mb-4">
+        <input
+          type="email"
+          id="email"
+          class="form-control"
+          name="customerEmail"
+          [(ngModel)]="adminLogin.customerEmail"
+          #customerEmail="ngModel"
+          required
+          placeholder="Email address"
+        />
+      </div>
+    
+      <!-- Password input -->
+      <div class="form-outline mb-4">
+        <input
+          type="password"
+          id="password"
+          class="form-control"
+          name="customerPassword"
+          [(ngModel)]="adminLogin.customerPassword"
+          #customerPassword="ngModel"
+          required
+          placeholder="Password"
+        />
+      </div>
+    
+      <!-- Submit button -->
+      <div class="button">
+        <button
+          type="submit"
+          class="btn btn-primary btn-block mb-4 w-100"
+          [disabled]="loginform.invalid"
+        >
+          Sign in
+        </button>
+      </div>
+    
+      <!-- Spinner -->
+      <div class="spinner d-flex justify-content-center" *ngIf="isLoadingSpinner">
+        <mat-spinner></mat-spinner>
+      </div>
+    </form>
+  </div>
+  

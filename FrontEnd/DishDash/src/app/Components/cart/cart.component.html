@@ -1,0 +1,33 @@
+<div class="cart-container">
+  <div *ngIf="!cartEmptyErrorMessage" class="details">
+    <h3 class="cart-title">Your Cart</h3>
+    <div class="cart-items">
+      <div *ngFor="let item of cart" class="cart-item">
+        <div class="item-image">
+          <img [src]="item.dishImage" alt="{{ item.dishName }}">
+        </div>
+        <div class="item-details">
+          <p class="item-name">{{ item.dishName }}</p>
+          <p class="item-price">Rs {{ item.dishPrice }}/-</p>
+          <span class="badge" [ngClass]="item.veg ? 'bg-success' : 'bg-danger'">{{ item.veg ? 'Veg' : 'Non-Veg' }}</span>
+        </div>
+        <div class="quantity-controls">
+          <button class="btn btn-dark" (click)="decreaseQuantity(item)">-</button>
+          <span>{{ item.quantity }}</span>
+          <button class="btn btn-dark" (click)="increaseQuantity(item)">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="cart-total">
+      <p>Total: Rs {{ total }}/-</p>
+    </div>
+    <div class="button">
+      <button class="btn btn-primary checkoutBtn" routerLink="customer/checkout">Checkout</button>
+    </div>
+  </div>
+
+  <div *ngIf="cartEmptyErrorMessage" class="cartempty">
+    <i class="fas fa-shopping-cart empty-cart-icon"></i>
+    <h6>Your Cart Is Empty</h6>
+  </div>
+</div>
